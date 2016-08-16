@@ -1,6 +1,6 @@
 {
-    "name": "vscode-nrepl",
-    "displayName": "vscode-nrepl",
+    "name": "clojure",
+    "displayName": "Clojure",
     "description": "Clojure nREPL support for Visual Studio Code",
     "version": "0.0.1",
     "publisher": "avli",
@@ -8,6 +8,7 @@
         "vscode": "^1.0.0"
     },
     "categories": [
+        "Languages",
         "Other"
     ],
     "activationEvents": [
@@ -22,11 +23,10 @@
         "postinstall": "node ./node_modules/vscode/bin/install"
     },
     "devDependencies": {
-        "typescript": "^1.8.5",
-        "vscode": "^0.11.0"
+        "typescript": "^1.8.10",
+        "vscode": "^0.11.17"
     },
     "dependencies": {
-        "nrepl-client": "^0.2.3",
         "bencoder": "^0.0.5"
     }
 }

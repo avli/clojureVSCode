@@ -2,7 +2,15 @@
 
 [Clojure](https://clojure.org) support for Visual Studio Code.
 
-Right now the development is been doing in [this branch](https://github.com/avli/clojureVSCode/tree/feature/completions).
+I'm trying, believe me!
+
+# Roadmap
+
+1. Completions.
+2. Send code to NREPL.
+3. Show symbol's documentation.
+4. Go to definition.
+5. Code lint.
 
 # License
 

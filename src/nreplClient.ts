@@ -4,10 +4,16 @@ import * as net from 'net';
 import {Buffer} from 'buffer';
 import * as Bencoder from 'bencoder';
 
-export interface nREPLCompleteMessage {
+interface nREPLCompleteMessage {
     op: string;
     symbol: string;
     ns?: string
+}
+
+interface nREPLInfoMessage {
+    op: string;
+    symbol: string;
+    ns: string;
 }
 
 export class nREPLClient {
@@ -21,10 +27,19 @@ export class nREPLClient {
     }
 
     public complete(symbol: string, callback) {
+        let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol};
+        this.send(msg, callback);
+    }
+
+    public info(symbol: string, ns: string, callback) {
+        let msg = {op: 'info', symbol: symbol, ns: ns};
+        this.send(msg, callback);
+    }
+
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage, callback) {
         let client = net.createConnection(this.port, this.host);
         let nreplResp = new Buffer('');
         client.on('connect', () => {
-            let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol};
             let encodedMsg = Bencoder.encode(msg);
             client.write(encodedMsg.toString());
         });

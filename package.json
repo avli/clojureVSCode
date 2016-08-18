@@ -16,6 +16,10 @@
     ],
     "main": "./out/src/clojureMain",
     "contributes": {
+        "commands": [{
+            "command": "clojureVSCode.eval",
+            "title": "Eval"
+        }]
     },
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",

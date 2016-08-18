@@ -10,12 +10,17 @@ import {
 import {
     ClojureCompletionItemProvider
 } from './clojureSuggest';
+import {
+    clojureEval
+} from './clojureEval';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    console.log('Congratulations, your extension "vscode-nrepl" is now active!');
+    console.log('Congratulations, your extension "clojureVSCode" is now active!');
 
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'))
+
+    vscode.commands.registerCommand('clojureVSCode.eval', clojureEval);
 
 }
 

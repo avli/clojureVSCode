@@ -16,6 +16,11 @@ interface nREPLInfoMessage {
     ns: string;
 }
 
+interface nREPLEvalMessage {
+    op: string;
+    file: string;
+}
+
 export class nREPLClient {
 
     public host: string;
@@ -32,11 +37,16 @@ export class nREPLClient {
     }
 
     public info(symbol: string, ns: string, callback) {
-        let msg = {op: 'info', symbol: symbol, ns: ns};
+        let msg: nREPLInfoMessage = {op: 'info', symbol: symbol, ns: ns};
         this.send(msg, callback);
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage, callback) {
+    public eval(code: string, callback) {
+        let msg: nREPLEvalMessage = {op: 'load-file', file: code};
+        this.send(msg, callback);
+    }
+
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage, callback) {
         let client = net.createConnection(this.port, this.host);
         let nreplResp = new Buffer('');
         client.on('connect', () => {

@@ -8,8 +8,8 @@ I'm trying, believe me!
 
 1. Completions.
 2. Send code to NREPL.
-3. Show symbol's documentation.
-4. Go to definition.
+3. Go to definition.
+4. Show symbol's documentation.
 5. Code lint.
 
 # License

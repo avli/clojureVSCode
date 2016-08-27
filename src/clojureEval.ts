@@ -9,26 +9,113 @@ import {
     nREPLClient
 } from './nreplClient';
 
+import {
+    ClojureProvider
+} from './clojureProvider';
+
+interface ErrorDescription {
+    position: vscode.Position,
+        message: string
+}
+
+export class ClojureEvaluator extends ClojureProvider {
+
+    public eval() {
+
+        let editor = vscode.window.activeTextEditor;
+        let text: string = editor.document.getText();
+        let ns = this.getNamespace(text);
+        let isSelection = !editor.selection.isEmpty;
+
+        if (isSelection) {
+            let selection = editor.selection;
+            text = `(ns ${ns}) ${editor.document.getText(selection)}`;
+        }
+
+        let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
+        diagnostics.clear();
+        let nrepl = this.getNREPL();
+        nrepl.eval(text, (result) => {
+            console.log(result);
+            if (result.value) {
+                vscode.window.showInformationMessage('Successfully compiled')
+                diagnostics.clear();
+            } else if (result.status) {
+                nrepl.stacktrace(result.session, (stackteace) => {
+                    vscode.window.showErrorMessage('Compilation error')
+                    let errorDescription = this.parseError(stackteace.err);
+                    let errLine = errorDescription.position.line;
+                    let errChar = errorDescription.position.character;
+                    let errMsg = errorDescription.message;
+                    editor.selection = new vscode.Selection(errorDescription.position, errorDescription.position);
+                    let errLineLength = editor.document.lineAt(errLine).text.length;
+                    diagnostics.set(vscode.window.activeTextEditor.document.uri, [new vscode.Diagnostic(new vscode.Range(errLine, 0, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
+                })
+            }
+        })
+    }
+
+    public parseError(error: string): ErrorDescription {
+        let m = error.match(/(\d+):(\d+)/);
+        if (m) {
+            let [line, char] = [Number.parseInt(m[1]), Number.parseInt(m[2])];
+            return {
+                position: new vscode.Position(line - 1, char),
+                message: error
+            }
+        } else {
+            // TODO
+        }
+    }
+
+}
+
 export function clojureEval() {
+
     let editor = vscode.window.activeTextEditor;
     let text: string = editor.document.getText();
-    let ns: string = text.match(/^.*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'*(\w+).*\)/)[1] || 'user';
-    let isSelection = !editor.selection.isEmpty; 
+    let ns: string = text.match(/^.*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?(\w+)[\s\S]*\)[\s\S]*/)[1] || 'user';
+    let isSelection = !editor.selection.isEmpty;
 
     if (isSelection) {
         let selection = editor.selection;
         text = `(ns ${ns}) ${editor.document.getText(selection)}`;
     }
-    
+
     let nrepl = new nREPLClient('127.0.0.1', getNREPLPort());
+    let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
+    diagnostics.clear();
     nrepl.eval(text, (result) => {
         console.log(result);
         if (result.value) {
-            vscode.window.showInformationMessage('Done!');
+            vscode.window.showInformationMessage('Successfully compiled')
+            diagnostics.clear();
         } else if (result.status) {
-            vscode.window.showErrorMessage('Wasted');
+            nrepl.stacktrace(result.session, (stackteace) => {
+                vscode.window.showErrorMessage('Compilation error')
+                let errorDescription = parseError(stackteace.err);
+                let errLine = errorDescription.position.line;
+                let errChar = errorDescription.position.character;
+                let errMsg = errorDescription.message;
+                editor.selection = new vscode.Selection(errorDescription.position, errorDescription.position);
+                let errLineLength = editor.document.lineAt(errLine).text.length;
+                diagnostics.set(vscode.window.activeTextEditor.document.uri, [new vscode.Diagnostic(new vscode.Range(errLine, 0, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
+            })
         }
     })
+}
+
+function parseError(error: string): ErrorDescription {
+    let m = error.match(/(\d+):(\d+)/);
+    if (m) {
+        let [line, char] = [Number.parseInt(m[1]), Number.parseInt(m[2])];
+        return {
+            position: new vscode.Position(line - 1, char),
+            message: error
+        }
+    } else {
+        // TODO
+    }
 }
 
 function getNREPLPort(): number {

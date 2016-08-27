@@ -19,20 +19,28 @@ interface nREPLInfoMessage {
 interface nREPLEvalMessage {
     op: string;
     file: string;
+    'file-name': string
+}
+
+interface nREPLStacktraceMessage {
+    op: string;
+    session: string;
 }
 
 export class nREPLClient {
 
     public host: string;
     public port: number;
+    private client: net.Socket;
 
     public constructor(host: string, port: number) {
         this.host = host;
         this.port = port;
+        this.client = net.createConnection(this.port, this.host);
     }
 
-    public complete(symbol: string, callback) {
-        let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol};
+    public complete(symbol: string, ns: string, callback) {
+        let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol, ns: ns};
         this.send(msg, callback);
     }
 
@@ -42,22 +50,26 @@ export class nREPLClient {
     }
 
     public eval(code: string, callback) {
-        let msg: nREPLEvalMessage = {op: 'load-file', file: code};
+        let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-name': 'foo.clj'};
         this.send(msg, callback);
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage, callback) {
-        let client = net.createConnection(this.port, this.host);
+    public stacktrace(session: string, callback) {
+        let msg: nREPLStacktraceMessage = {op: 'stacktrace', session: session};
+        this.send(msg, callback);
+    }
+
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage, callback) {
         let nreplResp = new Buffer('');
-        client.on('connect', () => {
+        this.client.on('connect', () => {
             let encodedMsg = Bencoder.encode(msg);
-            client.write(encodedMsg.toString());
+            this.client.write(encodedMsg.toString());
         });
-        client.on('data', (data) => {
+        this.client.on('data', (data) => {
             try {
                 nreplResp = Buffer.concat([nreplResp, data]);
-                let completions = Bencoder.decode(nreplResp);
-                callback(completions);
+                let response = Bencoder.decode(nreplResp);
+                callback(response);
             } catch (error) {
                 // waiting for the rest of the response
             }

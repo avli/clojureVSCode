@@ -31,12 +31,10 @@ export class nREPLClient {
 
     public host: string;
     public port: number;
-    private client: net.Socket;
 
     public constructor(host: string, port: number) {
         this.host = host;
         this.port = port;
-        this.client = net.createConnection(this.port, this.host);
     }
 
     public complete(symbol: string, ns: string, callback) {
@@ -60,12 +58,15 @@ export class nREPLClient {
     }
 
     private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage, callback) {
+        // TODO: Return promise?
         let nreplResp = new Buffer('');
-        this.client.on('connect', () => {
-            let encodedMsg = Bencoder.encode(msg);
-            this.client.write(encodedMsg.toString());
-        });
-        this.client.on('data', (data) => {
+        let encodedMsg = Bencoder.encode(msg);
+        const client = net.createConnection(this.port, this.host);
+        client.on('error', (error) => {
+            callback(false);
+        }); 
+        client.write(encodedMsg);
+        client.on('data', (data) => {
             try {
                 nreplResp = Buffer.concat([nreplResp, data]);
                 let response = Bencoder.decode(nreplResp);

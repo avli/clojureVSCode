@@ -70,7 +70,7 @@ export class ClojureEvaluator extends ClojureProvider {
 
 }
 
-export function clojureEval() {
+export function clojureEval(context: vscode.ExtensionContext) {
 
     let editor = vscode.window.activeTextEditor;
     let text: string = editor.document.getText();
@@ -82,7 +82,15 @@ export function clojureEval() {
         text = `(ns ${ns}) ${editor.document.getText(selection)}`;
     }
 
-    let nrepl = new nREPLClient('127.0.0.1', getNREPLPort());
+    let port = context.workspaceState.get < number > ('port');
+    let host = context.workspaceState.get < string > ('host');
+
+    if ((!port) || (!host)) {
+        vscode.window.showInformationMessage('You should connect to nREPL first to evaluate code.')
+        return;
+    }
+
+    let nrepl = new nREPLClient(host, port);
     let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
     diagnostics.clear();
     nrepl.eval(text, (result) => {

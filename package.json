@@ -16,10 +16,16 @@
     ],
     "main": "./out/src/clojureMain",
     "contributes": {
-        "commands": [{
-            "command": "clojureVSCode.eval",
-            "title": "Eval"
-        }]
+        "commands": [
+            {
+                "command": "clojureVSCode.eval",
+                "title": "Eval"
+            },
+            {
+                "command": "clojureVSCode.connect",
+                "title": "Connect to nREPL"
+            }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "node ./node_modules/vscode/bin/compile",

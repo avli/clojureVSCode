@@ -27,6 +27,8 @@ Code navigation
 
 Interaction with REPL
 
+Showing documentation on hover
+
 # Features That Are Not Supported (But Nice to Have)
 
 Function signatures

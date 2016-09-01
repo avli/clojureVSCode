@@ -74,9 +74,9 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
 
     public resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): Thenable < vscode.CompletionItem > {
         return new Promise < vscode.CompletionItem > ((resolve, reject) => {
-            // Not sure why but it works with clojure.core as a namespace.
-            // XXX: Figure out why.
-            this.getNREPL().info(item.label, 'clojure.core', (info) => {
+            let document = vscode.window.activeTextEditor.document;
+            let ns = this.getNamespace(document.getText());
+            this.getNREPL().info(item.label, ns, (info) => {
                 item.documentation = info.doc;
                 resolve(item);
             })

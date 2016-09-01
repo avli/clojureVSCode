@@ -30,6 +30,13 @@ import {
     JarContentProvider
 } from './jarContentProvider';
 
+let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+
+function updateConnectionIndicator(port: number, host: string) {
+    connectionIndicator.text = `nrepl://${host}:${port}`;
+    connectionIndicator.show();
+}
+
 function getNREPLPort(context: vscode.ExtensionContext): void {
     let nreplPort: number;
     const nreplHost = '127.0.0.1';
@@ -44,7 +51,8 @@ function getNREPLPort(context: vscode.ExtensionContext): void {
 
     if (nreplPort) {
         context.workspaceState.update('port', nreplPort);
-        context.workspaceState.update('host', nreplHost)
+        context.workspaceState.update('host', nreplHost);
+        updateConnectionIndicator(nreplPort, nreplHost);
     }
 }
 
@@ -64,10 +72,11 @@ function connect(context: vscode.ExtensionContext) {
             value: 'localhost'
         }).then((host) => {
             let nreplClient = new nREPLClient(port, host);
-            context.workspaceState.update('port', port);
-            context.workspaceState.update('host', host);
             nreplClient.eval('(+ 2 2)', (data) => {
                 if (data.value === '4') {
+                    context.workspaceState.update('port', port);
+                    context.workspaceState.update('host', host);
+                    updateConnectionIndicator(port, host);
                     vscode.window.showInformationMessage('Successfully connected to the nREPL.')
                 } else {
                     vscode.window.showErrorMessage('Can\'t connect to the nREPL.');

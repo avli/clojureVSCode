@@ -27,7 +27,7 @@ export class ClojureDefinitionProvider extends ClojureProvider implements vscode
             let nrepl = this.getNREPL();
             nrepl.info(currentWord, ns, (info) => {
                 if (!info.file) {
-                    vscode.window.showInformationMessage(`Can't find definition for ${currentWord}.`);
+                    // vscode.window.showInformationMessage(`Can't find definition for ${currentWord}.`);
                     reject();
                 }
                 let uri = vscode.Uri.parse(info.file);

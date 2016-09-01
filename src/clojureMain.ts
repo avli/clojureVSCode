@@ -30,25 +30,22 @@ import {
     JarContentProvider
 } from './jarContentProvider';
 
-function getNREPLPort(): number {
+function getNREPLPort(context: vscode.ExtensionContext): void {
     let nreplPort: number;
+    const nreplHost = '127.0.0.1';
     let projectDir = vscode.workspace.rootPath;
-    let globalNREPLFile = path.join(os.homedir(), '.lein', 'repl-port');
-
-    if (!projectDir) {
-        nreplPort = Number.parseInt(fs.readFileSync(globalNREPLFile, 'utf-8'))
-    }
 
     if (projectDir) {
         let localNREPLFile = path.join(projectDir, '.nrepl-port');
         if (fs.existsSync(localNREPLFile)) {
             nreplPort = Number.parseInt(fs.readFileSync(localNREPLFile, 'utf-8'))
-        } else {
-            nreplPort = Number.parseInt(fs.readFileSync(globalNREPLFile, 'utf-8'))
         }
     }
 
-    return nreplPort;
+    if (nreplPort) {
+        context.workspaceState.update('port', nreplPort);
+        context.workspaceState.update('host', nreplHost)
+    }
 }
 
 function connect(context: vscode.ExtensionContext) {

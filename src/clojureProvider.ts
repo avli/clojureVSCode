@@ -13,23 +13,24 @@ import {
  */
 export class ClojureProvider {
 
-    private port: number;
-    private host: string;
+    private context: vscode.ExtensionContext;
 
     /**
-     * @param port nREPL port
-     * @param host nREPL host
+     * @param context Extention context
      */
-    constructor(port: number, host?: string) {
-        this.port = port;
-        this.host = host || '127.0.0.1';
+    constructor(context : vscode.ExtensionContext) {
+        this.context = context;
     }
 
     /**
      * Returns nREPL client instance.
      */
     protected getNREPL(): nREPLClient {
-        return new nREPLClient(this.host, this.port);
+        let port: number;
+        let host: string;
+        port = this.context.workspaceState.get< number >('port');
+        host = this.context.workspaceState.get< string >('host');
+        return new nREPLClient(port, host);
     }
 
     /**

@@ -66,13 +66,12 @@ function connect(context: vscode.ExtensionContext) {
             prompt: 'nREPL host',
             value: 'localhost'
         }).then((host) => {
-            let nreplClient = new nREPLClient(host, port);
+            let nreplClient = new nREPLClient(port, host);
             context.workspaceState.update('port', port);
             context.workspaceState.update('host', host);
             nreplClient.eval('(+ 2 2)', (data) => {
                 if (data.value === '4') {
                     vscode.window.showInformationMessage('Successfully connected to the nREPL.')
-                    registerProviders(context);
                 } else {
                     vscode.window.showErrorMessage('Can\'t connect to the nREPL.');
                 }
@@ -81,17 +80,12 @@ function connect(context: vscode.ExtensionContext) {
     });
 }
 
-function registerProviders(context: vscode.ExtensionContext) {
-    let port = context.workspaceState.get < number > ('port');
-    let host = context.workspaceState.get < string > ('host');
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(port, host), '.', '/'))
-    context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider(port, host)));
-    context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(port, host)));
-}
-
 export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('clojureVSCode.connect', () => {connect(context)});
     vscode.commands.registerCommand('clojureVSCode.eval', () => {clojureEval(context)});
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(context), '.', '/'))
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider(context)));
+    context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(context)));
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
 }

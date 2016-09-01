@@ -7,7 +7,9 @@ import * as vscode from 'vscode';
 import {
     nREPLClient
 } from './nreplClient';
-import {ClojureProvider} from './clojureProvider';
+import {
+    ClojureProvider
+} from './clojureProvider';
 
 const mappings = {
     'nil': vscode.CompletionItemKind.Value,
@@ -70,7 +72,7 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
         })
     }
 
-    public resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): Thenable<vscode.CompletionItem> {
+    public resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): Thenable < vscode.CompletionItem > {
         return new Promise < vscode.CompletionItem > ((resolve, reject) => {
             // Not sure why but it works with clojure.core as a namespace.
             // XXX: Figure out why.

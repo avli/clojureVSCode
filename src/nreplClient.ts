@@ -32,7 +32,7 @@ export class nREPLClient {
     public host: string;
     public port: number;
 
-    public constructor(host: string, port: number) {
+    public constructor(port: number, host: string) {
         this.host = host;
         this.port = port;
     }

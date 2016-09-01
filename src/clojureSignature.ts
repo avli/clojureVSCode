@@ -15,7 +15,25 @@ export class ClojureSignatureProvider extends ClojureProvider implements vscode.
 
     provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable < vscode.SignatureHelp > {
         return new Promise < vscode.SignatureHelp > ((resolve, reject) => {
-            // TODO
+            let wordRange = document.getWordRangeAtPosition(position);
+            if (wordRange === undefined) {
+                return reject(); //resolve(new vscode.Hover('Docstring not found'));
+            }
+            let currentWord: string;
+            currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
+            let ns = this.getNamespace(document.getText());
+
+            let nrepl = this.getNREPL();
+            nrepl.info(currentWord, ns, (info) => {
+                if (info.doc) {
+                    let signatureHelp = new vscode.SignatureHelp();
+                    signatureHelp.activeParameter = 0;
+                    signatureHelp.activeSignature = 0;
+                    signatureHelp.signatures = [new vscode.SignatureInformation('a b c')]
+                    resolve(signatureHelp);
+                }
+                reject();
+            });
         });
     }
 }

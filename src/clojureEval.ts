@@ -90,7 +90,7 @@ export function clojureEval(context: vscode.ExtensionContext) {
         return;
     }
 
-    let nrepl = new nREPLClient(host, port);
+    let nrepl = new nREPLClient(port, host);
     let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
     diagnostics.clear();
     nrepl.eval(text, (result) => {

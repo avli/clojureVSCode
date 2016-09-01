@@ -33,7 +33,7 @@ import {
 let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
 function updateConnectionIndicator(port: number, host: string) {
-    connectionIndicator.text = `nrepl://${host}:${port}`;
+    connectionIndicator.text = `⚡nrepl://${host}:${port}`;
     connectionIndicator.show();
 }
 
@@ -94,6 +94,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(context)));
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
+
+    let port = context.workspaceState.get<number>('port');
+    let host = context.workspaceState.get<string>('host');
+    if (port && host ) {
+        updateConnectionIndicator(port, host);
+    }
 }
 
 export function deactivate() {}

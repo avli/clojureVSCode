@@ -29,12 +29,14 @@ interface nREPLStacktraceMessage {
 
 export class nREPLClient {
 
-    public host: string;
-    public port: number;
+    private host: string;
+    private port: number;
+    private client: net.Socket;
 
     public constructor(port: number, host: string) {
         this.host = host;
         this.port = port;
+        this.client = net.createConnection(this.port, this.host);
     }
 
     public complete(symbol: string, ns: string, callback) {
@@ -66,12 +68,12 @@ export class nREPLClient {
         // TODO: Return promise?
         let nreplResp = new Buffer('');
         let encodedMsg = Bencoder.encode(msg);
-        const client = net.createConnection(this.port, this.host);
-        client.on('error', (error) => {
+        // const client = net.createConnection(this.port, this.host);
+        this.client.on('error', (error) => {
             callback(false);
         }); 
-        client.write(encodedMsg);
-        client.on('data', (data) => {
+        this.client.write(encodedMsg);
+        this.client.on('data', (data) => {
             try {
                 nreplResp = Buffer.concat([nreplResp, data]);
                 let response = Bencoder.decode(nreplResp);

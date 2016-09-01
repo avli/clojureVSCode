@@ -17,6 +17,9 @@ export class ClojureDefinitionProvider extends ClojureProvider implements vscode
     provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable < vscode.Definition > {
         return new Promise((resolve, reject) => {
             let wordRange = document.getWordRangeAtPosition(position);
+            if (!wordRange) {
+                return reject();
+            }
             let currentWord: string;
             currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
             let ns = this.getNamespace(document.getText());

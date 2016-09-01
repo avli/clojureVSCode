@@ -90,10 +90,12 @@ export function clojureEval(context: vscode.ExtensionContext) {
         return;
     }
 
+    let filename = editor.document.fileName;
+
     let nrepl = new nREPLClient(port, host);
     let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
     diagnostics.clear();
-    nrepl.eval(text, (result) => {
+    nrepl.evalFile(text, filename, (result) => {
         console.log(result);
         if (result.value) {
             vscode.window.showInformationMessage('Successfully compiled')

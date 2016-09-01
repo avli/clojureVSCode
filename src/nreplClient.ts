@@ -19,7 +19,7 @@ interface nREPLInfoMessage {
 interface nREPLEvalMessage {
     op: string;
     file: string;
-    'file-name': string
+    'file-path'?: string
 }
 
 interface nREPLStacktraceMessage {
@@ -48,7 +48,12 @@ export class nREPLClient {
     }
 
     public eval(code: string, callback) {
-        let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-name': 'foo.clj'};
+        let msg: nREPLEvalMessage = {op: 'load-file', file: code};
+        this.send(msg, callback);
+    }
+
+    public evalFile(code: string, filepath: string, callback) {
+        let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath};
         this.send(msg, callback);
     }
 

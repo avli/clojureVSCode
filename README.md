@@ -15,7 +15,7 @@ This means you will need to add it to your ``profiles.clj``. Put the following c
        :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
 ```
 
-When you open a project the extension tries to connect to an nREPL automatically.
+When you open a project the extension tries to connect to nREPL automatically.
 Otherwise you may run `Connect to nREPL` command through the Visual Studio Code 
 command pallet.  
 
@@ -27,13 +27,21 @@ Code navigation
 
 Interaction with REPL
 
+# Features That Are Not Supported (But Nice to Have)
+
+Function signatures
+
+Linting
+
+[Debug](https://github.com/indiejames/vscode-clojure-debug)
+
 # Troubleshooting
 
 ## I don't see completions from the current namespace!
 
 You should eval the file first using the `Eval` command.
 
-## How to understand if I'm connected to an nREPL?
+## How to understand if I'm connected to nREPL?
 
 If you see a `nrepl://nreplhost:nreplport` status bar item, most likely you 
 are connected :)

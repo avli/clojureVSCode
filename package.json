@@ -4,6 +4,7 @@
     "description": "Clojure nREPL support for Visual Studio Code",
     "version": "0.0.1",
     "publisher": "avli",
+    "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.0.0"
     },

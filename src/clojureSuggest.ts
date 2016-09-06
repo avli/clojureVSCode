@@ -58,6 +58,9 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
             let nrepl = this.getNREPL()
             nrepl.complete(currentWord, ns, (completions) => {
                 let suggestions = [];
+                if (!completions) {
+                    return reject();
+                }
                 completions.completions.forEach(element => {
                     suggestions.push({
                         label: element.candidate,

@@ -37,7 +37,12 @@ function updateConnectionIndicator(port: number, host: string) {
     connectionIndicator.show();
 }
 
-function getNREPLPort(context: vscode.ExtensionContext): void {
+function resetConnectionParams(context: vscode.ExtensionContext) {
+    context.workspaceState.update('port', undefined);
+    context.workspaceState.update('host', undefined);
+}
+
+function updateConnectionParams(context: vscode.ExtensionContext): void {
     let nreplPort: number;
     const nreplHost = '127.0.0.1';
     let projectDir = vscode.workspace.rootPath;
@@ -95,6 +100,8 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
 
+    resetConnectionParams(context);
+    updateConnectionParams(context);
     let port = context.workspaceState.get<number>('port');
     let host = context.workspaceState.get<string>('host');
     if (port && host ) {

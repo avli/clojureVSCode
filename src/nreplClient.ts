@@ -19,12 +19,17 @@ interface nREPLInfoMessage {
 interface nREPLEvalMessage {
     op: string;
     file: string;
-    'file-path'?: string
+    'file-path'?: string,
+    session: string;
 }
 
 interface nREPLStacktraceMessage {
     op: string;
     session: string;
+}
+
+interface nREPLCloneMessage {
+    op: string;
 }
 
 export class nREPLClient {
@@ -50,13 +55,19 @@ export class nREPLClient {
     }
 
     public eval(code: string, callback) {
-        let msg: nREPLEvalMessage = {op: 'load-file', file: code};
-        this.send(msg, callback);
+        this.clone((new_session) => {
+            let session_id = new_session['new-session'];
+            let msg: nREPLEvalMessage = {op: 'load-file', file: code, session: session_id};
+            this.send(msg, callback);
+        })
     }
 
     public evalFile(code: string, filepath: string, callback) {
-        let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath};
-        this.send(msg, callback);
+        this.clone((new_session) => {
+            let session_id = new_session['new-session'];
+            let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath, session: session_id};
+            this.send(msg, callback);
+        })
     }
 
     public stacktrace(session: string, callback) {
@@ -64,7 +75,12 @@ export class nREPLClient {
         this.send(msg, callback);
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage, callback) {
+    public clone(callback) {
+        let msg = {op: 'clone'};
+        this.send(msg, callback);
+    }
+
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage, callback) {
         // TODO: Return promise?
         let nreplResp = new Buffer('');
         let encodedMsg = Bencoder.encode(msg);

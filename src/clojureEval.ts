@@ -18,58 +18,6 @@ interface ErrorDescription {
         message: string
 }
 
-export class ClojureEvaluator extends ClojureProvider {
-
-    public eval() {
-
-        let editor = vscode.window.activeTextEditor;
-        let text: string = editor.document.getText();
-        let ns = this.getNamespace(text);
-        let isSelection = !editor.selection.isEmpty;
-
-        if (isSelection) {
-            let selection = editor.selection;
-            text = `(ns ${ns}) ${editor.document.getText(selection)}`;
-        }
-
-        let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
-        diagnostics.clear();
-        let nrepl = this.getNREPL();
-        nrepl.eval(text, (result) => {
-            console.log(result);
-            if (result.value) {
-                vscode.window.showInformationMessage('Successfully compiled')
-                diagnostics.clear();
-            } else if (result.status) {
-                nrepl.stacktrace(result.session, (stackteace) => {
-                    vscode.window.showErrorMessage('Compilation error')
-                    let errorDescription = this.parseError(stackteace.err);
-                    let errLine = errorDescription.position.line;
-                    let errChar = errorDescription.position.character;
-                    let errMsg = errorDescription.message;
-                    editor.selection = new vscode.Selection(errorDescription.position, errorDescription.position);
-                    let errLineLength = editor.document.lineAt(errLine).text.length;
-                    diagnostics.set(vscode.window.activeTextEditor.document.uri, [new vscode.Diagnostic(new vscode.Range(errLine, 0, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
-                })
-            }
-        })
-    }
-
-    public parseError(error: string): ErrorDescription {
-        let m = error.match(/(\d+):(\d+)/);
-        if (m) {
-            let [line, char] = [Number.parseInt(m[1]), Number.parseInt(m[2])];
-            return {
-                position: new vscode.Position(line - 1, char),
-                message: error
-            }
-        } else {
-            // TODO
-        }
-    }
-
-}
-
 export function clojureEval(context: vscode.ExtensionContext) {
 
     let editor = vscode.window.activeTextEditor;
@@ -102,7 +50,7 @@ export function clojureEval(context: vscode.ExtensionContext) {
             diagnostics.clear();
         } else if (result.status) {
             nrepl.stacktrace(result.session, (stackteace) => {
-                vscode.window.showErrorMessage('Compilation error')
+                vscode.window.showErrorMessage('Compilation error');
                 let errorDescription = parseError(stackteace.err);
                 let errLine = errorDescription.position.line;
                 let errChar = errorDescription.position.character;

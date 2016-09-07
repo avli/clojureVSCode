@@ -63,16 +63,12 @@ const keywords = [
     'go',
     'go\\-loop',
     'thread'
-].join('|');
-
-const pattern = new RegExp(`^[\\s\\t]*?\\([\\s\\t]*${keywords}.*$`);
+]
 
 export class ClojureLanguageConfiguration implements vscode.LanguageConfiguration {
     wordPattern = /[\w\-\.][\w\d\.\\/\-\?]+/;
-    onEnterRules = [{
-        beforeText: pattern,
-        action: {
-            indentAction: vscode.IndentAction.Indent
-        }
-    }]
+    indentationRules = {
+        decreaseIndentPattern: undefined,
+        increaseIndentPattern: /^\s*\(.*[^)]\s*$/
+    }
 }

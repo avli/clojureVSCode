@@ -58,16 +58,16 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
             let nrepl = this.getNREPL()
             nrepl.complete(currentWord, ns, (completions) => {
                 let suggestions = [];
-                if (!completions) {
+                if ('completions' in completions) {
+                    completions.completions.forEach(element => {
+                        suggestions.push({
+                            label: element.candidate,
+                            kind: mappings[element.type] || vscode.CompletionItemKind.Text,
+                        })
+                    })
+                } else {
                     return reject();
                 }
-                completions.completions.forEach(element => {
-                    suggestions.push({
-                        label: element.candidate,
-                        kind: mappings[element.type] || vscode.CompletionItemKind.Text,
-                    })
-                });
-
                 let completionList: vscode.CompletionList = new vscode.CompletionList(suggestions, false);
                 resolve(completionList);
 

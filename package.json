@@ -4,6 +4,10 @@
     "description": "Clojure nREPL support for Visual Studio Code",
     "version": "0.3.0",
     "publisher": "avli",
+    "author": {
+        "name": "Andrey Lisin",
+        "email": "andrey.lisin@gmail.com"
+    },
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.0.0"

@@ -38,23 +38,6 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
 
             let currentWordLength: number = currentWord.length;
 
-            function buildInsertText(suggestion: string): boolean | string {
-                if (suggestion[0] === ':') return suggestion.slice(1);
-
-                let idxOfLastDot = currentWord.lastIndexOf('.');
-                let idxOfLastSlash = currentWord.lastIndexOf('/');
-
-                if ((idxOfLastDot === -1) && (idxOfLastSlash === -1)) {
-                    return false;
-                }
-
-                if (idxOfLastDot > idxOfLastSlash) {
-                    return currentWord.slice(idxOfLastDot + 1) + suggestion.slice(currentWordLength);
-                } else {
-                    return currentWord.slice(idxOfLastSlash + 1) + suggestion.slice(currentWordLength);
-                }
-            }
-
             let nrepl = this.getNREPL()
             nrepl.complete(currentWord, ns, (completions) => {
                 let suggestions = [];
@@ -62,7 +45,7 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
                     completions.completions.forEach(element => {
                         suggestions.push({
                             label: element.candidate,
-                            kind: mappings[element.type] || vscode.CompletionItemKind.Text,
+                            kind: mappings[element.type] || vscode.CompletionItemKind.Text
                         })
                     })
                 } else {

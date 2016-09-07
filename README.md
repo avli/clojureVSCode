@@ -4,9 +4,11 @@
 
 I'm trying, believe me!
 
+![Workflow](https://raw.githubusercontent.com/avli/clojureVSCode/master/images/workflow.gif)
+
 # How to Use?
 
-This extension relies on [Cider nREPL](https://github.com/clojure-emacs/cider-nrepl). 
+This extension relies on [Cider nREPL](https://github.com/clojure-emacs/cider-nrepl).
 This means you will need to add it to your ``profiles.clj``. Put the following content to your
  `~/.lein/profiles.clj`:
 
@@ -16,8 +18,8 @@ This means you will need to add it to your ``profiles.clj``. Put the following c
 ```
 
 When you open a project the extension tries to connect to nREPL automatically.
-Otherwise you may run `Connect to nREPL` command through the Visual Studio Code 
-command pallet.  
+Otherwise you may run `Connect to nREPL` command through the Visual Studio Code
+command pallet.
 
 # Supported Features
 
@@ -45,7 +47,7 @@ You should eval the file first using the `Eval` command.
 
 ## How to understand if I'm connected to nREPL?
 
-If you see a `nrepl://nreplhost:nreplport` status bar item, most likely you 
+If you see a `nrepl://nreplhost:nreplport` status bar item, most likely you
 are connected :)
 
 # License

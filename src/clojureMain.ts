@@ -83,8 +83,8 @@ function connect(context: vscode.ExtensionContext) {
                 return Promise.reject(false);
             }
             let nreplClient = new nREPLClient(port, host);
-            nreplClient.eval('(+ 2 2)', (data) => {
-                if (data.value === '4') {
+            nreplClient.clone((response) => {
+                if ('new-session' in response) {
                     context.workspaceState.update('port', port);
                     context.workspaceState.update('host', host);
                     updateConnectionIndicator(port, host);

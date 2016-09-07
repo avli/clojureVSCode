@@ -93,9 +93,8 @@ export class nREPLClient {
         // TODO: Return promise?
         let nreplResp = new Buffer('');
         let encodedMsg = Bencoder.encode(msg);
-        // const client = net.createConnection(this.port, this.host);
         this.client.on('error', (error) => {
-            callback(false);
+            callback(error);
         }); 
         this.client.write(encodedMsg);
         this.client.on('data', (data) => {

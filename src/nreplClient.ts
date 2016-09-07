@@ -32,6 +32,10 @@ interface nREPLCloneMessage {
     op: string;
 }
 
+interface nREPLCloseMessage {
+    op: string;
+}
+
 export class nREPLClient {
 
     private host: string;
@@ -80,7 +84,12 @@ export class nREPLClient {
         this.send(msg, callback);
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage, callback) {
+    public close(callback) {
+        let msg = {op: 'close'};
+        this.send(msg, callback);
+    }
+
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage, callback) {
         // TODO: Return promise?
         let nreplResp = new Buffer('');
         let encodedMsg = Bencoder.encode(msg);

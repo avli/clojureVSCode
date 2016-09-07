@@ -73,8 +73,9 @@ export function clojureEval(context: vscode.ExtensionContext) {
                 editor.selection = new vscode.Selection(errPos, errPos);
                 let errLineLength = editor.document.lineAt(errLine).text.length;
 
-                diagnostics.set(errFileUri, [new vscode.Diagnostic(new vscode.Range(errLine, 1, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
+                diagnostics.set(errFileUri, [new vscode.Diagnostic(new vscode.Range(errLine, errChar, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
             })
+            nrepl2.close(() => {});
         }
     })
 }

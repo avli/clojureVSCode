@@ -66,6 +66,9 @@ function connect(context: vscode.ExtensionContext) {
     vscode.window.showInputBox({
         prompt: 'nREPL port number'
     }).then((value) => {
+        if (!value) {
+            return Promise.reject(false);
+        }
         port = Number.parseInt(value);
         if (!port) {
             vscode.window.showErrorMessage('Port number should be an integer.')
@@ -76,6 +79,9 @@ function connect(context: vscode.ExtensionContext) {
             prompt: 'nREPL host',
             value: 'localhost'
         }).then((host) => {
+            if (!host) {
+                return Promise.reject(false);
+            }
             let nreplClient = new nREPLClient(port, host);
             nreplClient.eval('(+ 2 2)', (data) => {
                 if (data.value === '4') {

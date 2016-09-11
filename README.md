@@ -4,7 +4,7 @@
 
 I'm trying, believe me!
 
-![Workflow](https://raw.githubusercontent.com/avli/clojureVSCode/master/images/workflow.gif)
+![Workflow](/images/workflow.gif)
 
 # How to Use?
 

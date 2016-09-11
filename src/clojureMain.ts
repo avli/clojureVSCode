@@ -75,9 +75,10 @@ function connect(context: vscode.ExtensionContext) {
             return Promise.reject(false);
         }
     }).then((value) => {
+        let defaultHost = os.platform() === 'win32' ? undefined : 'localhost';
         vscode.window.showInputBox({
             prompt: 'nREPL host',
-            value: 'localhost'
+            value: defaultHost
         }).then((host) => {
             if (!host) {
                 return Promise.reject(false);

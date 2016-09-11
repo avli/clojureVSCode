@@ -55,11 +55,11 @@ export function clojureEval(context: vscode.ExtensionContext) {
             nrepl2.stacktrace(result.session, (stackteace) => {
                 vscode.window.showErrorMessage('Compilation error');
                 let errLine = stackteace.line - 1;
-                let errChar = stackteace.column;
+                let errChar = stackteace.column - 1;
                 let errFile = stackteace.file;
                 let errFileUri: vscode.Uri;
                 if (errFile) {
-                    errFileUri = vscode.Uri.parse('file://' + errFile);
+                    errFileUri = vscode.Uri.file(errFile);
                 } else {
                     errFileUri = vscode.window.activeTextEditor.document.uri;
                 }

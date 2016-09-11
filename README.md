@@ -13,7 +13,7 @@ This means you will need to add it to your ``profiles.clj``. Put the following c
  `~/.lein/profiles.clj`:
 
 ```clojure
-{:user {:plugins  [[cider/cider-nrepl "0.12.0-SNAPSHOT"]
+{:user {:plugins  [[cider/cider-nrepl "0.12.0-SNAPSHOT"]]
        :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
 ```
 

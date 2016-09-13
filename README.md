@@ -41,6 +41,11 @@ Linting
 
 # Troubleshooting
 
+## Code completion doesn't work, what I'm doing wrong?
+
+Most likely you forgot to add `cider-nrepl` to the list of dependencies. Please,
+consult `How to Use?` section.  
+
 ## I don't see completions from the current namespace!
 
 You should eval the file first using the `Eval` command.

@@ -23,7 +23,7 @@ export function clojureEval(context: vscode.ExtensionContext) {
     let editor = vscode.window.activeTextEditor;
     let text: string = editor.document.getText();
     let ns: string;
-    let match = text.match(/^.*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w.\-\/]+)[\s\S]*\)[\s\S]*/);
+    let match = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w.\-\/]+)[\s\S]*\)[\s\S]*/);
     match ? ns = match[1] : ns = 'user';
     let selection = editor.selection;
     let isSelection = !selection.isEmpty;

@@ -39,7 +39,7 @@ export class ClojureProvider {
      * @param text Clojure code snippet
      */
     protected getNamespace(text): string {
-        let m = text.match(/^.*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
+        let m = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
         return m ? m[1] : 'user';
     }
 }

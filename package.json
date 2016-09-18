@@ -24,11 +24,11 @@
         "commands": [
             {
                 "command": "clojureVSCode.eval",
-                "title": "Eval"
+                "title": "Clojure: Eval"
             },
             {
                 "command": "clojureVSCode.connect",
-                "title": "Connect to nREPL"
+                "title": "Clojure: Connect to nREPL"
             }
         ]
     },

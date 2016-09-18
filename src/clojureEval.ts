@@ -18,7 +18,7 @@ interface ErrorDescription {
         message: string
 }
 
-export function clojureEval(context: vscode.ExtensionContext) {
+export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vscode.OutputChannel) {
 
     let editor = vscode.window.activeTextEditor;
     let text: string = editor.document.getText();
@@ -50,6 +50,10 @@ export function clojureEval(context: vscode.ExtensionContext) {
         if (result.value) {
             vscode.window.showInformationMessage('Successfully compiled')
             diagnostics.clear();
+            if (outputChannel) {
+                outputChannel.appendLine(`=> ${result.value}`);
+                outputChannel.show();
+            }
         } else if (result.ex) {
             let nrepl2 = new nREPLClient(port, host);
             nrepl2.stacktrace(result.session, (stackteace) => {

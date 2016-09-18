@@ -98,8 +98,10 @@ function connect(context: vscode.ExtensionContext) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+    let evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.connect', () => {connect(context)});
     vscode.commands.registerCommand('clojureVSCode.eval', () => {clojureEval(context)});
+    vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => {clojureEval(context, evaluationResultChannel)});
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(context), '.', '/'))
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider(context)));
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(context)));

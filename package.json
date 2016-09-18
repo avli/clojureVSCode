@@ -27,6 +27,10 @@
                 "title": "Clojure: Eval"
             },
             {
+                "command": "clojureVSCode.evalAndShowResult",
+                "title": "Clojure: Eval and show the result"
+            },
+            {
                 "command": "clojureVSCode.connect",
                 "title": "Clojure: Connect to nREPL"
             }

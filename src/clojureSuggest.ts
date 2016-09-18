@@ -19,7 +19,8 @@ const mappings = {
     'namespace': vscode.CompletionItemKind.Module,
     'function': vscode.CompletionItemKind.Function,
     'special-form': vscode.CompletionItemKind.Keyword,
-    'var': vscode.CompletionItemKind.Variable
+    'var': vscode.CompletionItemKind.Variable,
+    'method': vscode.CompletionItemKind.Method
 }
 
 export class ClojureCompletionItemProvider extends ClojureProvider implements vscode.CompletionItemProvider {
@@ -38,6 +39,10 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
 
             let currentWordLength: number = currentWord.length;
 
+            let buildInsertText = (suggestion: string) => {
+                return suggestion[0] === '.' ? suggestion.slice(1) : suggestion;
+            }
+
             let nrepl = this.getNREPL()
             nrepl.complete(currentWord, ns, (completions) => {
                 let suggestions = [];
@@ -45,7 +50,8 @@ export class ClojureCompletionItemProvider extends ClojureProvider implements vs
                     completions.completions.forEach(element => {
                         suggestions.push({
                             label: element.candidate,
-                            kind: mappings[element.type] || vscode.CompletionItemKind.Text
+                            kind: mappings[element.type] || vscode.CompletionItemKind.Text,
+                            insertText: buildInsertText(element.candidate)
                         })
                     })
                 } else {

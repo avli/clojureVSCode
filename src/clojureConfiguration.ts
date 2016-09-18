@@ -66,7 +66,7 @@ const keywords = [
 ]
 
 export class ClojureLanguageConfiguration implements vscode.LanguageConfiguration {
-    wordPattern = /[\w\-\.:<>][\w\d\.\\/\-\?<>]+/;
+    wordPattern = /[\w\-\.:<>\*][\w\d\.\\/\-\?<>\*]+/;
     indentationRules = {
         decreaseIndentPattern: undefined,
         increaseIndentPattern: /^\s*\(.*[^)]\s*$/

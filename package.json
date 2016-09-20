@@ -49,5 +49,8 @@
         "bencoder": "^0.0.5",
         "jszip": "^3.1.1"
     },
-    "repository": "https://github.com/avli/clojureVSCode"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/avli/clojureVSCode"
+    }
 }

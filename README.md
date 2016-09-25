@@ -56,44 +56,53 @@ nREPL server started on port 45247 on host 127.0.0.1 - nrepl://127.0.0.1:45247
 REPL-y 0.3.7, nREPL 0.2.12
 Clojure 1.8.0
    ```
-   Please note the port that your nREPL is lisening on, in this case **45247** because you will need it later.
+   Note the port that your nREPL is lisening on, in this case **45247** because you may need it later.
 
-3. Open the project folder in VS Code.
 
-4. Connect to the running REPL.
+3. Now Let's Connect to the REPL.
 
-   Open the command pallet and select the command `Clojure: Connect to nREPL`
-
-  You should then be prompted for an nREPL port, enter the port noted in step #2, `45247`.
+  * Open the project folder in VS Code.
   
-  You should then be prompted for the host of the REPL. In this example we will enter `localhost`.
+  * Open a clojure source file such as `src/hello_clojure/core.clj`
+
+    If you have a repl running, the connection should be made automatically and you should see a repl indicator the status bar that looks like `nrepl://localhost:45247`. 
+    
+    If you see the indicator, good news you're connected. Please move onto next step.
+
+  * If you DO NOT see the connection indicator, or if you'd like to connect to a remote repl, we will need to create the connection manually.
+
+    Open the command pallet and select the command `Clojure: Connect to nREPL`
+    
+    You should then be prompted for an nREPL port, enter the port noted in step #2, `45247`.
+    
+    You should then be prompted for the host of the REPL. In this example we will enter `localhost`.
+    
+    You should then get a message showing successful connection to the nREPL! 
+    
+ 
+
+4. Eval a file. The repl needs to have it's namespace initialized and set so it can know about and show things like your docstrings.
+
+  * Open a clojure source file
   
-  You should then get a message showing successful connection to the nREPL! 
-  
-  You should also see a connection indicator on the bottom of the editor window on the left hand side of the status bar that looks like `nrepl://localhost:45247`.
-  
-  
-
-5. Now Eval a file. The repl needs to have it's namespace initialized and set so it can know about and show things like your docstrings.
-
-   Open the command pallet, and select the command `Clojure: Eval`.
+  * Open the command pallet, and select the command `Clojure: Eval`.
    
-   This should evaluate your entire file, and a file successfully compiled notification should be shown.
+    This should evaluate the entire file, and a file successfully compiled notification should be shown.
 
 
-6. Eval a selected expression
+5. Eval a selected expression
    
-   Show the output window by using the View / Output from menu bar if it's not already visible.
+  * Show the output window by using the View / Output from menu bar if it's not already visible.
    
-   Select a block of code you wish to evaluate.
+  * Select a block of code you wish to evaluate.
    
-   Open the command pallet, and select the command `Clojure: Eval and show the result`. 
+  * Open the command pallet, and select the command `Clojure: Eval and show the result`. 
    
-   Results from the REPL should be printed to the output window named `Evaluation Results`
+  * Results from the REPL should be printed to the output window named `Evaluation Results`
 
 
 
-7. All done, you're to code some clojure :)
+7. All done, you're ready to code some clojure :)
 
 
 

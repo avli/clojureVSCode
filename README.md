@@ -6,21 +6,6 @@ I'm trying, believe me!
 
 ![Workflow](/images/workflow.gif)
 
-# How to Use?
-
-This extension relies on [Cider nREPL](https://github.com/clojure-emacs/cider-nrepl).
-This means you will need to add it to your ``profiles.clj``. Put the following content to your
- `~/.lein/profiles.clj`:
-
-```clojure
-{:user {:plugins  [[cider/cider-nrepl "0.12.0-SNAPSHOT"]]
-       :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
-```
-
-When you open a project the extension tries to connect to nREPL automatically.
-Otherwise you may run `Connect to nREPL` command through the Visual Studio Code
-command pallet.
-
 # Supported Features
 
 Code completion
@@ -39,11 +24,20 @@ Linting
 
 [Debug](https://github.com/indiejames/vscode-clojure-debug)
 
+# Before you start
 
+This extension relies on [Cider nREPL](https://github.com/clojure-emacs/cider-nrepl).
+This means you will need to add it to your ``profiles.clj``. Put the following content to your
+ `~/.lein/profiles.clj`:
+
+```clojure
+{:user {:plugins  [[cider/cider-nrepl "0.13.0"]]
+       :dependencies [[org.clojure/tools.nrepl "0.2.12"]]}}
+```
 
 # Getting Started Walkthrough
 
-1. Create a clojure project you wish to connect to. For this guide we will use leinigen
+1. Create a Clojure project you wish to connect to. For this guide we will use Leinigen
    ```bash
       lein new hello-vscode
    ```
@@ -62,49 +56,47 @@ Clojure 1.8.0
 3. Now Let's Connect to the REPL.
 
   * Open the project folder in VS Code.
-  
+
   * Open a clojure source file such as `src/hello_clojure/core.clj`
 
-    If you have a repl running, the connection should be made automatically and you should see a repl indicator the status bar that looks like `nrepl://localhost:45247`. 
-    
+    If you have a repl running, the connection should be made automatically and you should see a repl indicator the status bar that looks like `nrepl://localhost:45247`.
+
     If you see the indicator, good news you're connected. Please move onto next step.
 
   * If you DO NOT see the connection indicator, or if you'd like to connect to a remote repl, we will need to create the connection manually.
 
     Open the command pallet and select the command `Clojure: Connect to nREPL`
-    
+
     You should then be prompted for an nREPL port, enter the port noted in step #2, `45247`.
-    
+
     You should then be prompted for the host of the REPL. In this example we will enter `localhost`.
-    
-    You should then get a message showing successful connection to the nREPL! 
-    
- 
+
+    You should then get a message showing successful connection to the nREPL!
+
+
 
 4. Eval a file. The repl needs to have it's namespace initialized and set so it can know about and show things like your docstrings.
 
-  * Open a clojure source file
-  
+  * Open a Clojure source file
+
   * Open the command pallet, and select the command `Clojure: Eval`.
-   
+
     This should evaluate the entire file, and a file successfully compiled notification should be shown.
 
 
 5. Eval a selected expression
-   
+
   * Show the output window by using the View / Output from menu bar if it's not already visible.
-   
+
   * Select a block of code you wish to evaluate.
-   
-  * Open the command pallet, and select the command `Clojure: Eval and show the result`. 
-   
+
+  * Open the command pallet, and select the command `Clojure: Eval and show the result`.
+
   * Results from the REPL should be printed to the output window named `Evaluation Results`
 
 
 
-7. All done, you're ready to code some clojure :)
-
-
+7. All done, you're ready to code some Clojure :)
 
 
 # Troubleshooting
@@ -112,7 +104,7 @@ Clojure 1.8.0
 ## Code completion doesn't work, what I'm doing wrong?
 
 Most likely you forgot to add `cider-nrepl` to the list of dependencies. Please,
-consult `How to Use?` section.  
+consult `How to Use?` section.
 
 ## I don't see completions from the current namespace!
 

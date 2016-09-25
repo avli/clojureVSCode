@@ -48,11 +48,12 @@ export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vs
     nrepl1.evalFile(text, filename, (result) => {
         console.log(result);
         if (result.value) {
-            vscode.window.showInformationMessage('Successfully compiled')
             diagnostics.clear();
             if (outputChannel) {
                 outputChannel.appendLine(`=> ${result.value}`);
                 outputChannel.show();
+            } else {
+                vscode.window.showInformationMessage('Successfully compiled');
             }
         } else if (result.ex) {
             let nrepl2 = new nREPLClient(port, host);

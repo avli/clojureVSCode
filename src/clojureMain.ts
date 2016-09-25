@@ -61,6 +61,15 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
     }
 }
 
+function testConnection(port: number, host: string, callback) {
+    let nreplClient = new nREPLClient(port, host);
+    nreplClient.clone((response) => {
+        callback(response);
+    });
+}
+
+const onSuccesfullConnectMessage = 'Successfully connected to the nREPL.';
+
 function connect(context: vscode.ExtensionContext) {
     let port: number;
     vscode.window.showInputBox({
@@ -82,17 +91,16 @@ function connect(context: vscode.ExtensionContext) {
             if (!host) {
                 return Promise.reject(false);
             }
-            let nreplClient = new nREPLClient(port, host);
-            nreplClient.clone((response) => {
+            testConnection(port, host, (response) => {
                 if ('new-session' in response) {
                     context.workspaceState.update('port', port);
                     context.workspaceState.update('host', host);
                     updateConnectionIndicator(port, host);
-                    vscode.window.showInformationMessage('Successfully connected to the nREPL.')
+                    vscode.window.showInformationMessage(onSuccesfullConnectMessage)
                 } else {
                     vscode.window.showErrorMessage('Can\'t connect to the nREPL.');
                 }
-            })
+            });
         })
     });
 }
@@ -114,6 +122,9 @@ export function activate(context: vscode.ExtensionContext) {
     let host = context.workspaceState.get<string>('host');
     if (port && host ) {
         updateConnectionIndicator(port, host);
+        testConnection(port, host, (response) => {
+            vscode.window.showInformationMessage(onSuccesfullConnectMessage)
+        });
     }
 }
 

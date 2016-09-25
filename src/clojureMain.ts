@@ -96,7 +96,7 @@ function connect(context: vscode.ExtensionContext) {
                     context.workspaceState.update('port', port);
                     context.workspaceState.update('host', host);
                     updateConnectionIndicator(port, host);
-                    vscode.window.showInformationMessage(onSuccesfullConnectMessage)
+                    vscode.window.showInformationMessage(onSuccesfullConnectMessage);
                 } else {
                     vscode.window.showErrorMessage('Can\'t connect to the nREPL.');
                 }

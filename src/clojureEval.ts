@@ -47,8 +47,11 @@ export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vs
     diagnostics.clear();
     nrepl1.evalFile(text, filename, (result) => {
         console.log(result);
+        if (result.out) {
+            outputChannel.append(result.out);
+            outputChannel.show();
+        }
         if (result.value) {
-            diagnostics.clear();
             if (outputChannel) {
                 outputChannel.appendLine(`=> ${result.value}`);
                 outputChannel.show();
@@ -70,7 +73,7 @@ export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vs
                 }
                 let errMsg = stackteace.message;
 
-                // Adjust error position if selection has been evaluated
+                // Adjust an error position if a selection has been evaluated
                 if (isSelection) {
                     errLine = errLine + selection.start.line;
                     errChar = errChar + selection.start.character;

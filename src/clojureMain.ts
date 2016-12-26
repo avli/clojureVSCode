@@ -63,7 +63,7 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
 
 function testConnection(port: number, host: string, callback) {
     let nreplClient = new nREPLClient(port, host);
-    nreplClient.clone((response) => {
+    nreplClient.clone().then((response) => {
         callback(response);
     });
 }

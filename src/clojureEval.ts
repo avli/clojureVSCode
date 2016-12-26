@@ -45,48 +45,49 @@ export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vs
     let nrepl1 = new nREPLClient(port, host);
     let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
     diagnostics.clear();
-    nrepl1.evalFile(text, filename, (result) => {
-        console.log(result);
-        if (result.out) {
-            outputChannel.append(result.out);
-            outputChannel.show();
-        }
-        if (result.value) {
-            if (outputChannel) {
-                outputChannel.appendLine(`=> ${result.value}`);
+    nrepl1.evalFile(text, filename).then(respObjs => {
+        respObjs.forEach(result => {
+            if (result.out && outputChannel) {
+                outputChannel.append(result.out);
                 outputChannel.show();
-            } else {
-                vscode.window.showInformationMessage('Successfully compiled');
             }
-        } else if (result.ex) {
-            let nrepl2 = new nREPLClient(port, host);
-            nrepl2.stacktrace(result.session, (stackteace) => {
-                vscode.window.showErrorMessage('Compilation error');
-                let errLine = stackteace.line - 1;
-                let errChar = stackteace.column - 1;
-                let errFile = stackteace.file;
-                let errFileUri: vscode.Uri;
-                if (errFile) {
-                    errFileUri = vscode.Uri.file(errFile);
+            if (result.value) {
+                if (outputChannel) {
+                    outputChannel.appendLine(`=> ${result.value}`);
+                    outputChannel.show();
                 } else {
-                    errFileUri = vscode.window.activeTextEditor.document.uri;
+                    vscode.window.showInformationMessage('Successfully compiled');
                 }
-                let errMsg = stackteace.message;
+            } else if (result.ex) {
+                let nrepl2 = new nREPLClient(port, host);
+                nrepl2.stacktrace(result.session, (stackteace) => {
+                    vscode.window.showErrorMessage('Compilation error');
+                    let errLine = stackteace.line - 1;
+                    let errChar = stackteace.column - 1;
+                    let errFile = stackteace.file;
+                    let errFileUri: vscode.Uri;
+                    if (errFile) {
+                        errFileUri = vscode.Uri.file(errFile);
+                    } else {
+                        errFileUri = vscode.window.activeTextEditor.document.uri;
+                    }
+                    let errMsg = stackteace.message;
 
-                // Adjust an error position if a selection has been evaluated
-                if (isSelection) {
-                    errLine = errLine + selection.start.line;
-                    errChar = errChar + selection.start.character;
-                }
+                    // Adjust an error position if a selection has been evaluated
+                    if (isSelection) {
+                        errLine = errLine + selection.start.line;
+                        errChar = errChar + selection.start.character;
+                    }
 
-                let errPos = new vscode.Position(errLine, errChar);
-                editor.selection = new vscode.Selection(errPos, errPos);
-                let errLineLength = editor.document.lineAt(errLine).text.length;
+                    let errPos = new vscode.Position(errLine, errChar);
+                    editor.selection = new vscode.Selection(errPos, errPos);
+                    let errLineLength = editor.document.lineAt(errLine).text.length;
 
-                diagnostics.set(errFileUri, [new vscode.Diagnostic(new vscode.Range(errLine, errChar, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
-                nrepl2.close(() => {});
-            })
+                    diagnostics.set(errFileUri, [new vscode.Diagnostic(new vscode.Range(errLine, errChar, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
+                    nrepl2.close(() => {});
+                })
 
-        }
-    })
+            }
+        })
+    });
 }

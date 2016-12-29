@@ -3,8 +3,7 @@
 import * as net from 'net';
 import {Buffer} from 'buffer';
 
-// import * as bencode from 'bencode';
-const bencode = require('bencode');
+import * as bencodeUtil from './bencodeUtil';
 
 interface nREPLCompleteMessage {
     op: string;
@@ -22,6 +21,12 @@ interface nREPLEvalMessage {
     op: string;
     file: string;
     'file-path'?: string,
+    session: string;
+}
+
+interface nREPLSingleEvalMessage {
+    op: string;
+    code: string;
     session: string;
 }
 
@@ -61,7 +66,7 @@ export class nREPLClient {
     public eval(code: string): Promise<any[]> {
         return this.clone().then((new_session) => {
             let session_id = new_session['new-session'];
-            let msg: nREPLEvalMessage = {op: 'load-file', file: code, session: session_id};
+            let msg: nREPLSingleEvalMessage = {op: 'eval', code: code, session: session_id};
             return this.send(msg);
         });
     }
@@ -89,10 +94,10 @@ export class nREPLClient {
         this.send(msg).then(respObjs => callback(respObjs));
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage): Promise<any[]> {
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage): Promise<any[]> {
         return new Promise<any[]>((resolve, reject) => {
             const client = net.createConnection(this.port, this.host);
-            client.write(bencode.encode(msg), 'binary');
+            client.write(bencodeUtil.encode(msg), 'binary');
 
             client.on('error', error => {
                 client.end();
@@ -103,21 +108,27 @@ export class nREPLClient {
             let nreplResp = new Buffer('');
             const respObjects = [];
             client.on('data', data => {
-                try {
-                    nreplResp = Buffer.concat([nreplResp, data]);
-                    const respObject = bencode.decode(nreplResp, 'utf8');
-                    respObjects.push(respObject);
-                    nreplResp = new Buffer('');
+                nreplResp = Buffer.concat([nreplResp, data]);
+                const {decodedObjects, rest} = bencodeUtil.decodeObjects(nreplResp);
+                nreplResp = rest;
+                const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
+                    if (!isLastNreplObject(objs))
+                        objs.push(obj);
+                    return objs;
+                }, []);
+                respObjects.push(...validDecodedObjects);
 
-                    if (respObject.status && respObject.status.indexOf('done') > -1) {
-                        client.end();
-                        client.removeAllListeners();
-                        resolve(respObjects);
-                    }
-                } catch (error) {
-                    // waiting for the rest of the response
+                if (isLastNreplObject(respObjects)) {
+                    client.end();
+                    client.removeAllListeners();
+                    resolve(respObjects);
                 }
             });
         });
     }
+}
+
+function isLastNreplObject(nreplObjects: any[]): boolean {
+    const lastObj = [...nreplObjects].pop();
+    return lastObj && lastObj.status && lastObj.status.indexOf('done') > -1;
 }

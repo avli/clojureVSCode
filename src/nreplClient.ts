@@ -2,7 +2,8 @@
 
 import * as net from 'net';
 import {Buffer} from 'buffer';
-import * as Bencoder from 'bencoder';
+
+import * as bencodeUtil from './bencodeUtil';
 
 interface nREPLCompleteMessage {
     op: string;
@@ -23,6 +24,12 @@ interface nREPLEvalMessage {
     session: string;
 }
 
+interface nREPLSingleEvalMessage {
+    op: string;
+    code: string;
+    session: string;
+}
+
 interface nREPLStacktraceMessage {
     op: string;
     session: string;
@@ -40,71 +47,88 @@ export class nREPLClient {
 
     private host: string;
     private port: number;
-    private client: net.Socket;
 
     public constructor(port: number, host: string) {
         this.host = host;
         this.port = port;
-        this.client = net.createConnection(this.port, this.host);
     }
 
     public complete(symbol: string, ns: string, callback) {
         let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol, ns: ns};
-        this.send(msg, callback);
+        this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public info(symbol: string, ns: string, callback) {
         let msg: nREPLInfoMessage = {op: 'info', symbol: symbol, ns: ns};
-        this.send(msg, callback);
+        this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
-    public eval(code: string, callback) {
-        this.clone((new_session) => {
+    public eval(code: string): Promise<any[]> {
+        return this.clone().then((new_session) => {
             let session_id = new_session['new-session'];
-            let msg: nREPLEvalMessage = {op: 'load-file', file: code, session: session_id};
-            this.send(msg, callback);
-        })
+            let msg: nREPLSingleEvalMessage = {op: 'eval', code: code, session: session_id};
+            return this.send(msg);
+        });
     }
 
-    public evalFile(code: string, filepath: string, callback) {
-        this.clone((new_session) => {
+    public evalFile(code: string, filepath: string): Promise<any[]> {
+        return this.clone().then((new_session) => {
             let session_id = new_session['new-session'];
             let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath, session: session_id};
-            this.send(msg, callback);
-        })
+            return this.send(msg);
+        });
     }
 
     public stacktrace(session: string, callback) {
         let msg: nREPLStacktraceMessage = {op: 'stacktrace', session: session};
-        this.send(msg, callback);
+        this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
-    public clone(callback) {
+    public clone(): Promise<any[]> {
         let msg = {op: 'clone'};
-        this.send(msg, callback);
+        return this.send(msg).then(respObjs => respObjs[0]);
     }
 
     public close(callback) {
-        let msg = {op: 'close'};
-        this.send(msg, callback);
+        let msg: nREPLCloseMessage = {op: 'close'};
+        this.send(msg).then(respObjs => callback(respObjs));
     }
 
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage, callback) {
-        // TODO: Return promise?
-        let nreplResp = new Buffer('');
-        let encodedMsg = Bencoder.encode(msg);
-        this.client.on('error', (error) => {
-            callback(error);
-        }); 
-        this.client.write(encodedMsg);
-        this.client.on('data', (data) => {
-            try {
+    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage): Promise<any[]> {
+        return new Promise<any[]>((resolve, reject) => {
+            const client = net.createConnection(this.port, this.host);
+            client.write(bencodeUtil.encode(msg), 'binary');
+
+            client.on('error', error => {
+                client.end();
+                client.removeAllListeners();
+                reject(error);
+            });
+
+            let nreplResp = Buffer.from('');
+            const respObjects = [];
+            client.on('data', data => {
                 nreplResp = Buffer.concat([nreplResp, data]);
-                let response = Bencoder.decode(nreplResp);
-                callback(response);
-            } catch (error) {
-                // waiting for the rest of the response
-            }
+                const {decodedObjects, rest} = bencodeUtil.decodeObjects(nreplResp);
+                nreplResp = rest;
+                const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
+                    if (!isLastNreplObject(objs))
+                        objs.push(obj);
+                    return objs;
+                }, []);
+                respObjects.push(...validDecodedObjects);
+
+                if (isLastNreplObject(respObjects)) {
+                    client.end();
+                    client.removeAllListeners();
+                    resolve(respObjects);
+                }
+            });
         });
     }
+}
+
+function isLastNreplObject(nreplObjects: any[]): boolean {
+    const lastObj = [...nreplObjects].pop();
+    return lastObj && lastObj.status && lastObj.status.indexOf('done') > -1;
 }

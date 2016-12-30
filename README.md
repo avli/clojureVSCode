@@ -43,13 +43,15 @@ This means you will need to add it to your ``profiles.clj``. Put the following c
    ```
 
 2. Start a REPL in your terminal, and note the port the REPL is lisening on
-   ```bash
-$ cd hello-vscode
-$ lein repl
-nREPL server started on port 45247 on host 127.0.0.1 - nrepl://127.0.0.1:45247
-REPL-y 0.3.7, nREPL 0.2.12
-Clojure 1.8.0
-   ```
+
+```bash
+  $ cd hello-vscode
+  $ lein repl
+  nREPL server started on port 45247 on host 127.0.0.1 - nrepl://127.0.0.1:45247
+  REPL-y 0.3.7, nREPL 0.2.12
+  Clojure 1.8.0
+```
+
    Note the port that your nREPL is lisening on, in this case **45247** because you may need it later.
 
 
@@ -114,6 +116,12 @@ You should eval the file first using the `Eval` command.
 
 If you see a `nrepl://nreplhost:nreplport` status bar item, most likely you
 are connected :)
+
+# Thanks
+
+- [Thiago Almeida](https://github.com/fasfsfgs)
+- [Mike Ball](https://github.com/mikeball)
+- [Egor Yurtaev](https://github.com/yurtaev)
 
 # License
 

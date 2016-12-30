@@ -1,3 +1,5 @@
+'use strict';
+
 import * as bencoder from 'bencoder';
 
 const CONTINUATION_ERROR_MESSAGE: string = "Unexpected continuation: \"";
@@ -26,8 +28,7 @@ function decode(decodedResult: DecodedResult): DecodedResult {
     try {
         const decodedObj = bencoder.decode(decodedResult.rest);
         decodedResult.decodedObjects.push(decodedObj);
-        decodedResult.rest = new Buffer('');
-
+        decodedResult.rest = Buffer.from('');
         return decodedResult;
     } catch (error) {
         const errorMessage: string = error.message;
@@ -38,7 +39,7 @@ function decode(decodedResult: DecodedResult): DecodedResult {
             const encodedObj = rest.slice(0, rest.length - unexpectedContinuation.length);
 
             decodedResult.decodedObjects.push(bencoder.decode(encodedObj));
-            decodedResult.rest = new Buffer(unexpectedContinuation);
+            decodedResult.rest = Buffer.from(unexpectedContinuation);
 
             return decode(decodedResult);
         } else {

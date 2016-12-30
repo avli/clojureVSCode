@@ -105,7 +105,7 @@ export class nREPLClient {
                 reject(error);
             });
 
-            let nreplResp = new Buffer('');
+            let nreplResp = Buffer.from('');
             const respObjects = [];
             client.on('data', data => {
                 nreplResp = Buffer.concat([nreplResp, data]);

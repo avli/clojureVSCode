@@ -1,34 +1,18 @@
 'use strict';
 
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {
-    CLOJURE_MODE
-} from './clojureMode';
-import {
-    ClojureCompletionItemProvider
-} from './clojureSuggest';
-import {
-    clojureEval
-} from './clojureEval';
-import {
-    ClojureDefinitionProvider
-} from './clojureDefinition';
-import {
-    ClojureLanguageConfiguration
-} from './clojureConfiguration'
-import {
-    ClojureHoverProvider
-} from './clojureHover'
-import {
-    nREPLClient
-} from './nreplClient';
-import {
-    JarContentProvider
-} from './jarContentProvider';
+import { CLOJURE_MODE } from './clojureMode';
+import { ClojureCompletionItemProvider } from './clojureSuggest';
+import { clojureEval } from './clojureEval';
+import { ClojureDefinitionProvider } from './clojureDefinition';
+import { ClojureLanguageConfiguration } from './clojureConfiguration';
+import { ClojureHoverProvider } from './clojureHover';
+import { ClojureSignatureProvider } from './clojureSignature';
+import { nREPLClient } from './nreplClient';
+import { JarContentProvider } from './jarContentProvider';
 
 let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
@@ -107,12 +91,13 @@ function connect(context: vscode.ExtensionContext) {
 
 export function activate(context: vscode.ExtensionContext) {
     let evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
-    vscode.commands.registerCommand('clojureVSCode.connect', () => {connect(context)});
-    vscode.commands.registerCommand('clojureVSCode.eval', () => {clojureEval(context)});
-    vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => {clojureEval(context, evaluationResultChannel)});
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(context), '.', '/'))
+    vscode.commands.registerCommand('clojureVSCode.connect', () => { connect(context) });
+    vscode.commands.registerCommand('clojureVSCode.eval', () => { clojureEval(context) });
+    vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => { clojureEval(context, evaluationResultChannel) });
+    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(context), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider(context)));
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(context)));
+    context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(CLOJURE_MODE, new ClojureSignatureProvider(context), ' ', '\n'));
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
 
@@ -120,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
     updateConnectionParams(context);
     let port = context.workspaceState.get<number>('port');
     let host = context.workspaceState.get<string>('host');
-    if (port && host ) {
+    if (port && host) {
         updateConnectionIndicator(port, host);
         testConnection(port, host, (response) => {
             vscode.window.showInformationMessage(onSuccesfullConnectMessage)
@@ -128,4 +113,4 @@ export function activate(context: vscode.ExtensionContext) {
     }
 }
 
-export function deactivate() {}
+export function deactivate() { }

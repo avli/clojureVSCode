@@ -1,3 +1,7 @@
+# Version 0.5.0
+
+Adds signature helper [#6](https://github.com/avli/clojureVSCode/issues/8).
+
 # Version 0.4.3
 
 Fixes the issue when only one output line is printed [#9](https://github.com/avli/clojureVSCode/issues/9).

@@ -1,3 +1,7 @@
+# Version 0.5.1
+
+Updates the information about the supported features.
+
 # Version 0.5.0
 
 Adds signature helper [#6](https://github.com/avli/clojureVSCode/issues/8).

@@ -33,6 +33,14 @@
             {
                 "command": "clojureVSCode.connect",
                 "title": "Clojure: Connect to nREPL"
+            },
+            {
+                "command": "clojureVSCode.startNRepl",
+                "title": "Clojure: Start & Connect to nREPL"
+            },
+            {
+                "command": "clojureVSCode.stopNRepl",
+                "title": "Clojure: Stop nREPL"
             }
         ]
     },

@@ -13,6 +13,7 @@ import { ClojureHoverProvider } from './clojureHover';
 import { ClojureSignatureProvider } from './clojureSignature';
 import { nREPLClient } from './nreplClient';
 import { JarContentProvider } from './jarContentProvider';
+import { NreplController } from './clojureNRepl';
 
 let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
@@ -101,16 +102,30 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
 
-    resetConnectionParams(context);
-    updateConnectionParams(context);
-    let port = context.workspaceState.get<number>('port');
-    let host = context.workspaceState.get<string>('host');
-    if (port && host) {
-        updateConnectionIndicator(port, host);
-        testConnection(port, host, (response) => {
-            vscode.window.showInformationMessage(onSuccesfullConnectMessage)
-        });
+    function doConnect() {
+        // ToDo: Refactor Me, maybe controller?
+        resetConnectionParams(context);
+        updateConnectionParams(context);
+        let port = context.workspaceState.get<number>('port');
+        let host = context.workspaceState.get<string>('host');
+        if (port && host) {
+            updateConnectionIndicator(port, host);
+            testConnection(port, host, (response) => {
+                vscode.window.showInformationMessage(onSuccesfullConnectMessage)
+            });
+        }
     }
+
+    doConnect();
+
+    const nreplController = new NreplController();
+    context.subscriptions.push(nreplController);
+
+    vscode.commands.registerCommand('clojureVSCode.startNRepl', () => { nreplController.start(doConnect) });
+    vscode.commands.registerCommand('clojureVSCode.stopNRepl', () => {
+        nreplController.stop();
+        // ToDo: update indicator
+     });
 }
 
 export function deactivate() { }

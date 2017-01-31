@@ -1,3 +1,7 @@
+# Version 0.5.2
+
+Improves better support of special form signatures.
+
 # Version 0.5.1
 
 Updates the information about the supported features.

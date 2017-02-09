@@ -30,7 +30,7 @@ function resetConnectionParams(context: vscode.ExtensionContext) {
 function updateConnectionParams(context: vscode.ExtensionContext): void {
     let nreplPort: number;
     const nreplHost = '127.0.0.1';
-    let projectDir = vscode.workspace.rootPath;
+    const projectDir = vscode.workspace.rootPath;
 
     function readPortFromFile(path) {
         return Number.parseInt(fs.readFileSync(path, 'utf-8'))

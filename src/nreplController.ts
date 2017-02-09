@@ -3,11 +3,12 @@ import { spawn, ChildProcess } from 'child_process';
 
 import * as vscode from 'vscode';
 
-export class NreplController {
+export class nREPLController {
+
     nreplProcess?: ChildProcess;
 
     start(callback: Function) {
-        this.nreplProcess = spawn('lein', ['repl', ':headless'], {cwd: vscode.workspace.rootPath, detached: true});
+        this.nreplProcess = spawn('lein', ['repl', ':headless'], { cwd: vscode.workspace.rootPath, detached: true });
 
         this.nreplProcess.stdout.on('data', function (data) {
             if (data.toString().includes('nREPL server started')) {

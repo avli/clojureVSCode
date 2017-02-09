@@ -1,7 +1,7 @@
 'use strict';
 
 import * as net from 'net';
-import {Buffer} from 'buffer';
+import { Buffer } from 'buffer';
 
 import * as bencodeUtil from './bencodeUtil';
 
@@ -54,19 +54,19 @@ export class nREPLClient {
     }
 
     public complete(symbol: string, ns: string, callback) {
-        let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol, ns: ns};
+        let msg: nREPLCompleteMessage = { op: 'complete', symbol: symbol, ns: ns };
         this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public info(symbol: string, ns: string, callback) {
-        let msg: nREPLInfoMessage = {op: 'info', symbol: symbol, ns: ns};
+        let msg: nREPLInfoMessage = { op: 'info', symbol: symbol, ns: ns };
         this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public eval(code: string): Promise<any[]> {
         return this.clone().then((new_session) => {
             let session_id = new_session['new-session'];
-            let msg: nREPLSingleEvalMessage = {op: 'eval', code: code, session: session_id};
+            let msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
             return this.send(msg);
         });
     }
@@ -74,23 +74,23 @@ export class nREPLClient {
     public evalFile(code: string, filepath: string): Promise<any[]> {
         return this.clone().then((new_session) => {
             let session_id = new_session['new-session'];
-            let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath, session: session_id};
+            let msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
             return this.send(msg);
         });
     }
 
     public stacktrace(session: string, callback) {
-        let msg: nREPLStacktraceMessage = {op: 'stacktrace', session: session};
+        let msg: nREPLStacktraceMessage = { op: 'stacktrace', session: session };
         this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public clone(): Promise<any[]> {
-        let msg = {op: 'clone'};
+        let msg = { op: 'clone' };
         return this.send(msg).then(respObjs => respObjs[0]);
     }
 
     public close(callback) {
-        let msg: nREPLCloseMessage = {op: 'close'};
+        let msg: nREPLCloseMessage = { op: 'close' };
         this.send(msg).then(respObjs => callback(respObjs));
     }
 

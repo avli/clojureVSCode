@@ -13,7 +13,7 @@ import { ClojureHoverProvider } from './clojureHover';
 import { ClojureSignatureProvider } from './clojureSignature';
 import { nREPLClient } from './nreplClient';
 import { JarContentProvider } from './jarContentProvider';
-import { NreplController } from './clojureNRepl';
+import { nREPLController } from './nreplController';
 
 let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
@@ -32,10 +32,24 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
     const nreplHost = '127.0.0.1';
     let projectDir = vscode.workspace.rootPath;
 
+    function readPortFromFile(path) {
+        return Number.parseInt(fs.readFileSync(path, 'utf-8'))
+    }
+
     if (projectDir) {
         let localNREPLFile = path.join(projectDir, '.nrepl-port');
         if (fs.existsSync(localNREPLFile)) {
-            nreplPort = Number.parseInt(fs.readFileSync(localNREPLFile, 'utf-8'))
+            nreplPort = readPortFromFile(localNREPLFile)
+        }
+    }
+
+    if (!nreplPort) {
+        // We have one more option: the file with the port number can be at 
+        // ~/.lein/repl-port
+        const homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+        const globalNREPLFile = path.join(homeDir, '.lein', 'repl-port');
+        if (fs.existsSync(globalNREPLFile)) {
+            nreplPort = readPortFromFile(globalNREPLFile);
         }
     }
 
@@ -116,16 +130,14 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    doConnect();
-
-    const nreplController = new NreplController();
+    const nreplController = new nREPLController();
     context.subscriptions.push(nreplController);
 
     vscode.commands.registerCommand('clojureVSCode.startNRepl', () => { nreplController.start(doConnect) });
     vscode.commands.registerCommand('clojureVSCode.stopNRepl', () => {
         nreplController.stop();
         // ToDo: update indicator
-     });
+    });
 }
 
 export function deactivate() { }

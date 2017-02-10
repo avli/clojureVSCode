@@ -10,7 +10,7 @@
     },
     "icon": "images/icon.png",
     "engines": {
-        "vscode": "^1.0.0"
+        "vscode": "^1.5.0"
     },
     "categories": [
         "Languages",

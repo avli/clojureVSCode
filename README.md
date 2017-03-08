@@ -8,21 +8,16 @@ I'm trying, believe me!
 
 # Supported Features
 
-Code completion
-
-Code navigation
-
-Interaction with REPL
-
-Showing documentation on hover
-
-Function signatures
+* Code completion
+* Code navigation
+* Interaction with REPL
+* Showing documentation on hover
+* Function signatures
 
 # Features That Are Not Supported (But Nice to Have)
 
-Linting
-
-[Debug](https://github.com/indiejames/vscode-clojure-debug)
+* Linting
+* [Debug](https://github.com/indiejames/vscode-clojure-debug)
 
 # Before you start
 
@@ -56,7 +51,7 @@ This means you will need to add it to your ``profiles.clj``. Put the following c
 
 3. Now Let's Connect to the REPL.
 
-    * Open the project folder in VS Code.
+    3.1 Open the project folder in VS Code.
 
     * Open a clojure source file such as `src/hello_clojure/core.clj`
 

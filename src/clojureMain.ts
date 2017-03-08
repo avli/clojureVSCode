@@ -49,7 +49,7 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
         const homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
         const globalNREPLFile = path.join(homeDir, '.lein', 'repl-port');
         if (fs.existsSync(globalNREPLFile)) {
-            nreplPort = readPortFromFile(globalNREPLFile);
+            nreplPort = readPortFromFile(globalNREPLFile)
         }
     }
 
@@ -57,6 +57,9 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
         context.workspaceState.update('port', nreplPort);
         context.workspaceState.update('host', nreplHost);
         updateConnectionIndicator(nreplPort, nreplHost);
+        const terminal = vscode.window.createTerminal("Clojure REPL");
+        terminal.sendText(`lein repl :connect ${nreplPort}`);
+        terminal.show();
     }
 }
 
@@ -133,7 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
     const nreplController = new nREPLController();
     context.subscriptions.push(nreplController);
 
-    vscode.commands.registerCommand('clojureVSCode.startNRepl', () => { nreplController.start(doConnect) });
+    vscode.commands.registerCommand('clojureVSCode.startNRepl', () => { nreplController.start(connectionIndicator, doConnect) });
     vscode.commands.registerCommand('clojureVSCode.stopNRepl', () => {
         nreplController.stop();
         // ToDo: update indicator

@@ -23,7 +23,9 @@ export class nREPLController {
         '[cider/cider-nrepl "0.15.0-SNAPSHOT"]',
         '--', 'repl']
 
-    start(callback: Function): void {
+    start(statusBarConnectionIndicator: vscode.StatusBarItem, callback: Function): void {
+        statusBarConnectionIndicator.text = "Starting nREPL...";
+        statusBarConnectionIndicator.show();
         this.nreplProcess = spawn('lein', this.leinArgs,
             { cwd: vscode.workspace.rootPath, detached: true });
 

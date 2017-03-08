@@ -1,3 +1,7 @@
+# Version 0.5.3
+
+Cleans up the documentation a little
+
 # Version 0.5.2
 
 Improves better support of special form signatures.

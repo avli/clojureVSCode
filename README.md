@@ -105,6 +105,31 @@ You should eval the file first using the `Eval` command.
 If you see a `nrepl://nreplhost:nreplport` status bar item, most likely you
 are connected :)
 
+# How To Contribute
+
+Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to propose new features and ideas or to report bugs.
+
+## Help Develop
+
+This is how you run this extension from source:
+
+1. Download the source code and install npm dependencies;
+
+    ```bash
+    git clone https://github.com/avli/clojureVSCode.git
+    cd clojureVSCode
+    npm install
+    code .
+    ```
+
+2. Make the changes you want;
+
+3. Open `debug`, select `Launch Extension` and click on `Start Debugging` to open a new vscode window with your modified extension.
+
+Visual Studio Code has great [docs](https://code.visualstudio.com/docs/extensions/overview) about developping extensions. Check it out.
+
+*Fork us! Pull requests are welcome! :D*
+
 # Thanks
 
 - [Thiago Almeida](https://github.com/fasfsfgs)

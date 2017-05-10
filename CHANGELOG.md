@@ -1,3 +1,7 @@
+# Version 0.5.4
+
+Fixes possible bug with missing return from the `provideDefinition` function [#26](https://github.com/avli/clojureVSCode/issues/26).
+
 # Version 0.5.3
 
 Cleans up the documentation a little

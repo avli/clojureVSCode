@@ -36,6 +36,7 @@ interface nREPLStacktraceMessage {
 
 interface nREPLCloneMessage {
     op: string;
+    session?: string;
 }
 
 interface nREPLCloseMessage {
@@ -67,7 +68,7 @@ const evaluateFile = (code: string, filepath: string): Promise<any[]> => clone()
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-const clone = (): Promise<any[]> => send({ op: 'clone' }).then(respObjs => respObjs[0]);
+const clone = (session?: string): Promise<any[]> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
     return send({ op: 'clone' }, connectionInfo)

@@ -54,13 +54,13 @@ const info = (symbol: string, ns: string): Promise<any> => {
     return send(msg).then(respObjs => respObjs[0]);
 };
 
-const evaluate = (code: string): Promise<any[]> => clone().then((new_session) => {
+const evaluate = (code: string, session?: string): Promise<any[]> => clone(session).then((new_session) => {
     const session_id = new_session['new-session'];
     const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
     return send(msg);
 });
 
-const evaluateFile = (code: string, filepath: string): Promise<any[]> => clone().then((new_session) => {
+const evaluateFile = (code: string, filepath: string, session?: string): Promise<any[]> => clone(session).then((new_session) => {
     const session_id = new_session['new-session'];
     const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
     return send(msg);

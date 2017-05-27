@@ -18,11 +18,13 @@ export class ClojureHoverProvider implements vscode.HoverProvider {
         currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
         const ns = cljParser.getNamespace(document.getText());
 
-        return nreplClient.info(currentWord, ns).then(info => {
-            if (info.doc) {
-                return Promise.resolve(new vscode.Hover(info.doc));
-            }
-            return Promise.reject(undefined);
+        return cljConnection.sessionForFilename(document.fileName).then(session => {
+            return nreplClient.info(currentWord, ns, session.id).then(info => {
+                if (info.doc) {
+                    return Promise.resolve(new vscode.Hover(info.doc));
+                }
+                return Promise.reject(undefined);
+            });
         });
     }
 

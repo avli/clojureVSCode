@@ -82,6 +82,15 @@ const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
 
 const close = (session?: string): Promise<any[]> => send({ op: 'close', session: session });
 
+const listSessions = (): Promise<[string]> => {
+    return send({op: 'ls-sessions'}).then(respObjs => {
+        const response = respObjs[0];
+        if (response.status[0] == "done") {
+            return Promise.resolve(response.sessions);
+        }
+    });
+}
+
 const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
     return new Promise<any[]>((resolve, reject) => {
         connection = connection || cljConnection.getConnection();
@@ -135,4 +144,5 @@ export const nreplClient = {
     clone,
     test,
     close,
+    listSessions
 };

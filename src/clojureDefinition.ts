@@ -17,14 +17,16 @@ export class ClojureDefinitionProvider implements vscode.DefinitionProvider {
         const currentWord: string = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
         const ns = cljParser.getNamespace(document.getText());
 
-        return nreplClient.info(currentWord, ns).then(info => {
-            if (!info.file)
-                return Promise.reject('No word definition found.');
+        return cljConnection.sessionForFilename(document.fileName).then(session => {
+            return nreplClient.info(currentWord, ns, session.id).then(info => {
+                if (!info.file)
+                    return Promise.reject('No word definition found.');
 
-            let uri = vscode.Uri.parse(info.file);
-            let pos = new vscode.Position(info.line - 1, info.column)
-            let definition = new vscode.Location(uri, pos);
-            return Promise.resolve(definition);
+                let uri = vscode.Uri.parse(info.file);
+                let pos = new vscode.Position(info.line - 1, info.column)
+                let definition = new vscode.Location(uri, pos);
+                return Promise.resolve(definition);
+            });
         });
     }
 

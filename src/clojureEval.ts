@@ -20,23 +20,30 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
 
     const editor = vscode.window.activeTextEditor;
     const selection = editor.selection;
-
-    let text: string = editor.document.getText();
+    let text = editor.document.getText();
     if (!selection.isEmpty) {
         const ns: string = cljParser.getNamespace(text);
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
     }
 
-    const filename = editor.document.fileName;
-
-    nreplClient.evaluateFile(text, filename)
-        .then(respObjs => {
+    cljConnection.sessionForFilename(editor.document.fileName).then(session => {
+        let response;
+        if (!selection.isEmpty && session.type == 'ClojureScript') {
+            // Piggieback's evalFile() ignores the text sent as part of the request
+            // and just loads the whole file content from disk. So we use eval()
+            // here, which as a drawback will give us a random temporary filename in
+            // the stacktrace should an exception occur.
+            response = nreplClient.evaluate(text, session.id);
+        } else {
+            response = nreplClient.evaluateFile(text, editor.document.fileName, session.id);
+        }
+        response.then(respObjs => {
             if (!!respObjs[0].ex)
                 return handleError(outputChannel, selection, showResults, respObjs[0].session);
 
             return handleSuccess(outputChannel, showResults, respObjs);
         })
-        .then(() => nreplClient.close());
+    });
 }
 
 function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
@@ -47,8 +54,8 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
         .then(stacktraceObjs => {
             const stacktraceObj = stacktraceObjs[0];
 
-            let errLine = stacktraceObj.line - 1;
-            let errChar = stacktraceObj.column - 1;
+            let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
+            let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;
 
             if (!selection.isEmpty) {
                 errLine += selection.start.line;
@@ -64,6 +71,7 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
             });
 
             outputChannel.show();
+            nreplClient.close(session);
         });
 }
 
@@ -74,9 +82,12 @@ function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean
         respObjs.forEach(respObj => {
             if (respObj.out)
                 outputChannel.append(respObj.out);
+            if (respObj.err)
+                outputChannel.append(respObj.err);
             if (respObj.value)
                 outputChannel.appendLine(`=> ${respObj.value}`);
             outputChannel.show();
         });
     }
+    nreplClient.close(respObjs[0].session);
 }

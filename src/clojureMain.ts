@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 import { CLOJURE_MODE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
-import { clojureEval } from './clojureEval';
+import { clojureEval, clojureEvalAndShowResult } from './clojureEval';
 import { ClojureDefinitionProvider } from './clojureDefinition';
 import { ClojureLanguageConfiguration } from './clojureConfiguration';
 import { ClojureHoverProvider } from './clojureHover';
@@ -14,7 +14,7 @@ import { ClojureSignatureProvider } from './clojureSignature';
 import { nREPLClient } from './nreplClient';
 import { JarContentProvider } from './jarContentProvider';
 
-let connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+const connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
 function updateConnectionIndicator(port: number, host: string) {
     connectionIndicator.text = `⚡nrepl://${host}:${port}`;
@@ -32,9 +32,9 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
     let projectDir = vscode.workspace.rootPath;
 
     if (projectDir) {
-        let localNREPLFile = path.join(projectDir, '.nrepl-port');
+        const localNREPLFile = path.join(projectDir, '.nrepl-port');
         if (fs.existsSync(localNREPLFile)) {
-            nreplPort = Number.parseInt(fs.readFileSync(localNREPLFile, 'utf-8'))
+            nreplPort = Number.parseInt(fs.readFileSync(localNREPLFile, 'utf-8'));
         }
     }
 
@@ -64,7 +64,7 @@ function connect(context: vscode.ExtensionContext) {
         }
         port = Number.parseInt(value);
         if (!port) {
-            vscode.window.showErrorMessage('Port number should be an integer.')
+            vscode.window.showErrorMessage('Port number should be an integer.');
             return Promise.reject(false);
         }
     }).then((value) => {
@@ -90,10 +90,10 @@ function connect(context: vscode.ExtensionContext) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    let evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
+    const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.connect', () => { connect(context) });
-    vscode.commands.registerCommand('clojureVSCode.eval', () => { clojureEval(context) });
-    vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => { clojureEval(context, evaluationResultChannel) });
+    vscode.commands.registerCommand('clojureVSCode.eval', () => { clojureEval(context, evaluationResultChannel) });
+    vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => { clojureEvalAndShowResult(context, evaluationResultChannel) });
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(context), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider(context)));
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider(context)));
@@ -108,7 +108,7 @@ export function activate(context: vscode.ExtensionContext) {
     if (port && host) {
         updateConnectionIndicator(port, host);
         testConnection(port, host, (response) => {
-            vscode.window.showInformationMessage(onSuccesfullConnectMessage)
+            vscode.window.showInformationMessage(onSuccesfullConnectMessage);
         });
     }
 }

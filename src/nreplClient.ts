@@ -1,7 +1,7 @@
 'use strict';
 
 import * as net from 'net';
-import {Buffer} from 'buffer';
+import { Buffer } from 'buffer';
 
 import * as bencodeUtil from './bencodeUtil';
 
@@ -54,44 +54,44 @@ export class nREPLClient {
     }
 
     public complete(symbol: string, ns: string, callback) {
-        let msg: nREPLCompleteMessage = {op: 'complete', symbol: symbol, ns: ns};
+        const msg: nREPLCompleteMessage = { op: 'complete', symbol: symbol, ns: ns };
         this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public info(symbol: string, ns: string, callback) {
-        let msg: nREPLInfoMessage = {op: 'info', symbol: symbol, ns: ns};
+        const msg: nREPLInfoMessage = { op: 'info', symbol: symbol, ns: ns };
         this.send(msg).then(respObjs => callback(respObjs[0]));
     }
 
     public eval(code: string): Promise<any[]> {
         return this.clone().then((new_session) => {
-            let session_id = new_session['new-session'];
-            let msg: nREPLSingleEvalMessage = {op: 'eval', code: code, session: session_id};
+            const session_id = new_session['new-session'];
+            const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
             return this.send(msg);
         });
     }
 
     public evalFile(code: string, filepath: string): Promise<any[]> {
         return this.clone().then((new_session) => {
-            let session_id = new_session['new-session'];
-            let msg: nREPLEvalMessage = {op: 'load-file', file: code, 'file-path': filepath, session: session_id};
+            const session_id = new_session['new-session'];
+            const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
             return this.send(msg);
         });
     }
 
-    public stacktrace(session: string, callback) {
-        let msg: nREPLStacktraceMessage = {op: 'stacktrace', session: session};
-        this.send(msg).then(respObjs => callback(respObjs[0]));
+    public stacktrace(session: string): Promise<any> {
+        const msg: nREPLStacktraceMessage = { op: 'stacktrace', session: session };
+        return this.send(msg);
     }
 
     public clone(): Promise<any[]> {
-        let msg = {op: 'clone'};
+        const msg = { op: 'clone' };
         return this.send(msg).then(respObjs => respObjs[0]);
     }
 
-    public close(callback) {
-        let msg: nREPLCloseMessage = {op: 'close'};
-        this.send(msg).then(respObjs => callback(respObjs));
+    public close(): Promise<any[]> {
+        const msg: nREPLCloseMessage = { op: 'close' };
+        return this.send(msg);
     }
 
     private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage): Promise<any[]> {
@@ -109,7 +109,7 @@ export class nREPLClient {
             const respObjects = [];
             client.on('data', data => {
                 nreplResp = Buffer.concat([nreplResp, data]);
-                const {decodedObjects, rest} = bencodeUtil.decodeObjects(nreplResp);
+                const { decodedObjects, rest } = bencodeUtil.decodeObjects(nreplResp);
                 nreplResp = rest;
                 const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
                     if (!isLastNreplObject(objs))

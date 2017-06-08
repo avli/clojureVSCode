@@ -1,93 +1,86 @@
 'use strict';
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {
-    nREPLClient
-} from './nreplClient';
+import { nREPLClient } from './nreplClient';
+import { getNamespace } from './clojureProvider';
 
-import {
-    ClojureProvider
-} from './clojureProvider';
-
-interface ErrorDescription {
-    position: vscode.Position,
-        message: string
+export function clojureEval(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
+    evaluate(context, outputChannel, false);
 }
 
-export function clojureEval(context: vscode.ExtensionContext, outputChannel?: vscode.OutputChannel) {
+export function clojureEvalAndShowResult(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
+    evaluate(context, outputChannel, true);
+}
 
-    let editor = vscode.window.activeTextEditor;
+function evaluate(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel, showResults: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    const selection = editor.selection;
+
     let text: string = editor.document.getText();
-    let ns: string;
-    let match = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w.\-\/]+)[\s\S]*\)[\s\S]*/);
-    match ? ns = match[1] : ns = 'user';
-    let selection = editor.selection;
-    let isSelection = !selection.isEmpty;
-
-    if (isSelection) {
-        text = `(ns ${ns}) ${editor.document.getText(selection)}`;
+    if (!selection.isEmpty) {
+        const ns: string = getNamespace(text);
+        text = `(ns ${ns})\n${editor.document.getText(selection)}`;
     }
 
-    let port = context.workspaceState.get < number > ('port');
-    let host = context.workspaceState.get < string > ('host');
-
+    const port = context.workspaceState.get<number>('port');
+    const host = context.workspaceState.get<string>('host');
     if ((!port) || (!host)) {
         vscode.window.showInformationMessage('You should connect to nREPL first to evaluate code.')
         return;
     }
+    const nrepl = new nREPLClient(port, host);
 
-    let filename = editor.document.fileName;
+    const filename = editor.document.fileName;
 
-    let nrepl1 = new nREPLClient(port, host);
-    let diagnostics = vscode.languages.createDiagnosticCollection('Compilation Errors');
-    diagnostics.clear();
-    nrepl1.evalFile(text, filename).then(respObjs => {
-        respObjs.forEach(result => {
-            if (result.out && outputChannel) {
-                outputChannel.append(result.out);
-                outputChannel.show();
-            }
-            if (result.value) {
-                if (outputChannel) {
-                    outputChannel.appendLine(`=> ${result.value}`);
-                    outputChannel.show();
-                } else {
-                    vscode.window.showInformationMessage('Successfully compiled');
-                }
-            } else if (result.ex) {
-                let nrepl2 = new nREPLClient(port, host);
-                nrepl2.stacktrace(result.session, (stackteace) => {
-                    vscode.window.showErrorMessage('Compilation error');
-                    let errLine = stackteace.line - 1;
-                    let errChar = stackteace.column - 1;
-                    let errFile = stackteace.file;
-                    let errFileUri: vscode.Uri;
-                    if (errFile) {
-                        errFileUri = vscode.Uri.file(errFile);
-                    } else {
-                        errFileUri = vscode.window.activeTextEditor.document.uri;
-                    }
-                    let errMsg = stackteace.message;
+    nrepl.evalFile(text, filename)
+        .then(respObjs => {
+            if (!!respObjs[0].ex)
+                return handleError(nrepl, outputChannel, selection, showResults, respObjs[0].session);
 
-                    // Adjust an error position if a selection has been evaluated
-                    if (isSelection) {
-                        errLine = errLine + selection.start.line;
-                        errChar = errChar + selection.start.character;
-                    }
-
-                    let errPos = new vscode.Position(errLine, errChar);
-                    editor.selection = new vscode.Selection(errPos, errPos);
-                    let errLineLength = editor.document.lineAt(errLine).text.length;
-
-                    diagnostics.set(errFileUri, [new vscode.Diagnostic(new vscode.Range(errLine, errChar, errLine, errLineLength), errMsg, vscode.DiagnosticSeverity.Error)]);
-                    nrepl2.close(() => {});
-                })
-
-            }
+            return handleSuccess(outputChannel, showResults, respObjs);
         })
-    });
+        .then(() => nrepl.close());
+}
+
+function handleError(nrepl: nREPLClient, outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string) {
+    if (!showResults)
+        vscode.window.showErrorMessage('Compilation error');
+
+    return nrepl.stacktrace(session)
+        .then(stacktraceObjs => {
+            const stacktraceObj = stacktraceObjs[0];
+
+            let errLine = stacktraceObj.line - 1;
+            let errChar = stacktraceObj.column - 1;
+
+            if (!selection.isEmpty) {
+                errLine += selection.start.line;
+                errChar += selection.start.character;
+            }
+
+            outputChannel.appendLine(`${stacktraceObj.class} ${stacktraceObj.message}`);
+            outputChannel.appendLine(` at ${stacktraceObj.file}:${errLine}:${errChar}`);
+
+            stacktraceObj.stacktrace.forEach(trace => {
+                if (trace.flags.indexOf('tooling') > -1)
+                    outputChannel.appendLine(`    ${trace.class}.${trace.method} (${trace.file}:${trace.line})`);
+            });
+
+            outputChannel.show();
+        });
+}
+
+function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]) {
+    if (!showResults) {
+        vscode.window.showInformationMessage('Successfully compiled');
+    } else {
+        respObjs.forEach(respObj => {
+            if (respObj.out)
+                outputChannel.append(respObj.out);
+            if (respObj.value)
+                outputChannel.appendLine(`=> ${respObj.value}`);
+            outputChannel.show();
+        });
+    }
 }

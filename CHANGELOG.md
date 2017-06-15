@@ -1,3 +1,7 @@
+# Version 0.6.1
+
+Adds the forgotten changelog for the version 0.6.0 :-)
+
 # Version 0.6.0
 
 Changes the behavior of the `Eval` command - now it shows compilation errors in the `Output` panel [28](https://github.com/avli/clojureVSCode/issues/28).

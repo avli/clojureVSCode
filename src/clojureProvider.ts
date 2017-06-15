@@ -1,12 +1,8 @@
 'use strinct';
 
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
-import {
-    nREPLClient
-} from './nreplClient';
+
+import { nREPLClient } from './nreplClient';
 
 /**
  * Base class for Clojure providers.
@@ -18,7 +14,7 @@ export class ClojureProvider {
     /**
      * @param context Extention context
      */
-    constructor(context : vscode.ExtensionContext) {
+    constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
 
@@ -28,8 +24,8 @@ export class ClojureProvider {
     protected getNREPL(): nREPLClient {
         let port: number;
         let host: string;
-        port = this.context.workspaceState.get< number >('port');
-        host = this.context.workspaceState.get< string >('host');
+        port = this.context.workspaceState.get<number>('port');
+        host = this.context.workspaceState.get<string>('host');
         return new nREPLClient(port, host);
     }
 
@@ -39,7 +35,12 @@ export class ClojureProvider {
      * @param text Clojure code snippet
      */
     protected getNamespace(text): string {
-        let m = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
-        return m ? m[1] : 'user';
+        return getNamespace(text);
     }
+
+}
+
+export function getNamespace(text: string): string {
+    const m = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
+    return m ? m[1] : 'user';
 }

@@ -40,6 +40,7 @@ interface nREPLCloneMessage {
 
 interface nREPLCloseMessage {
     op: string;
+    session?: string;
 }
 
 const complete = (symbol: string, ns: string): Promise<any> => {
@@ -77,7 +78,7 @@ const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
         });
 };
 
-const close = (): Promise<any[]> => send({ op: 'close' });
+const close = (session?: string): Promise<any[]> => send({ op: 'close', session: session });
 
 const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
     return new Promise<any[]>((resolve, reject) => {

@@ -14,6 +14,7 @@ interface nREPLInfoMessage {
     op: string;
     symbol: string;
     ns: string;
+    session: string;
 }
 
 interface nREPLEvalMessage {
@@ -49,8 +50,8 @@ const complete = (symbol: string, ns: string): Promise<any> => {
     return send(msg).then(respObjs => respObjs[0]);
 };
 
-const info = (symbol: string, ns: string): Promise<any> => {
-    const msg: nREPLInfoMessage = { op: 'info', symbol, ns };
+const info = (symbol: string, ns: string, session?: string): Promise<any> => {
+    const msg: nREPLInfoMessage = { op: 'info', symbol, ns, session };
     return send(msg).then(respObjs => respObjs[0]);
 };
 

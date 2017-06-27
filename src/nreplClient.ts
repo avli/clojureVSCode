@@ -87,6 +87,7 @@ const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | 
             return reject('No connection found.');
 
         const client = net.createConnection(connection.port, connection.host);
+        Object.keys(msg).forEach(key => msg[key] === undefined && delete msg[key]);
         client.write(bencodeUtil.encode(msg), 'binary');
 
         client.on('error', error => {

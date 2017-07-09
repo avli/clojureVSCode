@@ -70,7 +70,7 @@ function connect(context: vscode.ExtensionContext) {
     }).then((value) => {
         vscode.window.showInputBox({
             prompt: 'nREPL host',
-            value: undefined
+            value: 'localhost'
         }).then((host) => {
             if (!host) {
                 return Promise.reject(false);

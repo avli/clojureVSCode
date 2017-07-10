@@ -71,7 +71,7 @@ function connect(context: vscode.ExtensionContext) {
                 return Promise.reject({ connectionError: 'Host must be informed.' });
             host = hostFromUser;
         })
-        .then(_ => testConnection(port, host))
+        .then(() => testConnection(port, host))
         .then(response => {
             if (!('new-session' in response))
                 return Promise.reject(false);
@@ -106,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     let host = context.workspaceState.get<string>('host');
     if (port && host) {
         updateConnectionIndicator(port, host);
-        testConnection(port, host).then(_ => vscode.window.showInformationMessage(onSuccesfullConnectMessage));
+        testConnection(port, host).then(() => vscode.window.showInformationMessage(onSuccesfullConnectMessage));
     }
 }
 

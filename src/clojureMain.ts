@@ -45,48 +45,47 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
     }
 }
 
-function testConnection(port: number, host: string, callback) {
-    let nreplClient = new nREPLClient(port, host);
-    nreplClient.clone().then((response) => {
-        callback(response);
-    });
+function testConnection(port: number, host: string): Promise<any[]> {
+    const nreplClient = new nREPLClient(port, host);
+    return nreplClient.clone();
 }
 
 const onSuccesfullConnectMessage = 'Successfully connected to the nREPL.';
 
 function connect(context: vscode.ExtensionContext) {
+    let host: string;
     let port: number;
-    vscode.window.showInputBox({
-        prompt: 'nREPL port number'
-    }).then((value) => {
-        if (!value) {
-            return Promise.reject(false);
-        }
-        port = Number.parseInt(value);
-        if (!port) {
-            vscode.window.showErrorMessage('Port number should be an integer.');
-            return Promise.reject(false);
-        }
-    }).then((value) => {
-        vscode.window.showInputBox({
-            prompt: 'nREPL host',
-            value: undefined
-        }).then((host) => {
-            if (!host) {
-                return Promise.reject(false);
-            }
-            testConnection(port, host, (response) => {
-                if ('new-session' in response) {
-                    context.workspaceState.update('port', port);
-                    context.workspaceState.update('host', host);
-                    updateConnectionIndicator(port, host);
-                    vscode.window.showInformationMessage(onSuccesfullConnectMessage);
-                } else {
-                    vscode.window.showErrorMessage('Can\'t connect to the nREPL.');
-                }
-            });
+
+    vscode.window.showInputBox({ prompt: 'nREPL port number' })
+        .then(portFromUser => {
+            if (!portFromUser)
+                return Promise.reject({ connectionError: 'Port number must be informed.' });
+
+            port = Number.parseInt(portFromUser);
+            if (!port)
+                return Promise.reject({ connectionError: 'Port number should be an integer.' });
         })
-    });
+        .then(_ => vscode.window.showInputBox({ prompt: 'nREPL host', value: '127.0.0.1' }))
+        .then(hostFromUser => {
+            if (!hostFromUser)
+                return Promise.reject({ connectionError: 'Host must be informed.' });
+            host = hostFromUser;
+        })
+        .then(() => testConnection(port, host))
+        .then(response => {
+            if (!('new-session' in response))
+                return Promise.reject(false);
+
+            context.workspaceState.update('port', port);
+            context.workspaceState.update('host', host);
+            updateConnectionIndicator(port, host);
+            vscode.window.showInformationMessage(onSuccesfullConnectMessage);
+        }, ({ connectionError }) => {
+            if (!connectionError)
+                connectionError = `Can't connect to the nREPL.`;
+
+            vscode.window.showErrorMessage(connectionError);
+        });
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -107,9 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     let host = context.workspaceState.get<string>('host');
     if (port && host) {
         updateConnectionIndicator(port, host);
-        testConnection(port, host, (response) => {
-            vscode.window.showInformationMessage(onSuccesfullConnectMessage);
-        });
+        testConnection(port, host).then(() => vscode.window.showInformationMessage(onSuccesfullConnectMessage));
     }
 }
 

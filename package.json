@@ -10,7 +10,7 @@
     },
     "icon": "images/icon.png",
     "engines": {
-        "vscode": "^1.0.0"
+        "vscode": "^1.5.0"
     },
     "categories": [
         "Languages",
@@ -33,6 +33,14 @@
             {
                 "command": "clojureVSCode.connect",
                 "title": "Clojure: Connect to nREPL"
+            },
+            {
+                "command": "clojureVSCode.startNRepl",
+                "title": "Clojure: Start & Connect to nREPL"
+            },
+            {
+                "command": "clojureVSCode.stopNRepl",
+                "title": "Clojure: Stop nREPL"
             }
         ]
     },

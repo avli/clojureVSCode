@@ -13,6 +13,7 @@ import { ClojureHoverProvider } from './clojureHover';
 import { ClojureSignatureProvider } from './clojureSignature';
 import { nREPLClient } from './nreplClient';
 import { JarContentProvider } from './jarContentProvider';
+import { nREPLController } from './nreplController';
 
 const connectionIndicator = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
@@ -29,12 +30,26 @@ function resetConnectionParams(context: vscode.ExtensionContext) {
 function updateConnectionParams(context: vscode.ExtensionContext): void {
     let nreplPort: number;
     const nreplHost = '127.0.0.1';
-    let projectDir = vscode.workspace.rootPath;
+    const projectDir = vscode.workspace.rootPath;
+
+    function readPortFromFile(path) {
+        return Number.parseInt(fs.readFileSync(path, 'utf-8'))
+    }
 
     if (projectDir) {
         const localNREPLFile = path.join(projectDir, '.nrepl-port');
         if (fs.existsSync(localNREPLFile)) {
-            nreplPort = Number.parseInt(fs.readFileSync(localNREPLFile, 'utf-8'));
+            nreplPort = readPortFromFile(localNREPLFile)
+        }
+    }
+
+    if (!nreplPort) {
+        // We have one more option: the file with the port number can be at
+        // ~/.lein/repl-port
+        const homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+        const globalNREPLFile = path.join(homeDir, '.lein', 'repl-port');
+        if (fs.existsSync(globalNREPLFile)) {
+            nreplPort = readPortFromFile(globalNREPLFile)
         }
     }
 
@@ -42,6 +57,9 @@ function updateConnectionParams(context: vscode.ExtensionContext): void {
         context.workspaceState.update('port', nreplPort);
         context.workspaceState.update('host', nreplHost);
         updateConnectionIndicator(nreplPort, nreplHost);
+        const terminal = vscode.window.createTerminal("Clojure REPL");
+        terminal.sendText(`lein repl :connect ${nreplPort}`);
+        terminal.show();
     }
 }
 
@@ -101,16 +119,28 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
 
-    resetConnectionParams(context);
-    updateConnectionParams(context);
-    let port = context.workspaceState.get<number>('port');
-    let host = context.workspaceState.get<string>('host');
-    if (port && host) {
-        updateConnectionIndicator(port, host);
-        testConnection(port, host, (response) => {
-            vscode.window.showInformationMessage(onSuccesfullConnectMessage);
-        });
+    function doConnect() {
+        // ToDo: Refactor Me, maybe controller?
+        resetConnectionParams(context);
+        updateConnectionParams(context);
+        let port = context.workspaceState.get<number>('port');
+        let host = context.workspaceState.get<string>('host');
+        if (port && host) {
+            updateConnectionIndicator(port, host);
+            testConnection(port, host, (response) => {
+                vscode.window.showInformationMessage(onSuccesfullConnectMessage)
+            });
+        }
     }
+
+    const nreplController = new nREPLController();
+    context.subscriptions.push(nreplController);
+
+    vscode.commands.registerCommand('clojureVSCode.startNRepl', () => { nreplController.start(connectionIndicator, doConnect) });
+    vscode.commands.registerCommand('clojureVSCode.stopNRepl', () => {
+        nreplController.stop();
+        // ToDo: update indicator
+    });
 }
 
 export function deactivate() { }

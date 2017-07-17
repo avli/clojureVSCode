@@ -1,5 +1,9 @@
 # Version 0.7.1
 
+Fixes README.md formatting to display correctly on the Visual Studio Marketplace web-site.
+
+# Version 0.7.1
+
 Fixes the links to the images in README.md.
 
 # Version 0.7.0

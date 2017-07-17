@@ -6,9 +6,7 @@ I'm trying, believe me!
 
 ## Quickstart
 
-Make sure [Leiningen](https://leiningen.org/) is installed on your machine, open 
-a Clojure file or project, wait until the extension, wait until the extension 
-will start and connect to nREPL and enjoy :-)
+Make sure [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension, wait until the extension will start and connect to nREPL and enjoy :-)
 
 ## Supported Features
 
@@ -33,11 +31,7 @@ will start and connect to nREPL and enjoy :-)
 
 ## How to Contribute
 
-Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to 
-propose new features and ideas or to report bugs. If you want to help with some
-code and looking for a place to start, please check out the 
-[How to Contribute](https://github.com/avli/clojureVSCode/wiki/Contribution) 
-wiki page.
+Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to propose new features and ideas or to report bugs. If you want to help with some code and looking for a place to start, please check out the [How to Contribute](https://github.com/avli/clojureVSCode/wiki/Contribution) wiki page.
 
 ## Thanks
 

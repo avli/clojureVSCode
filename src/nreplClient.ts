@@ -1,9 +1,8 @@
-'use strict';
-
 import * as net from 'net';
 import { Buffer } from 'buffer';
 
 import * as bencodeUtil from './bencodeUtil';
+import { cljConnection, CljConnectionInformation } from './cljConnection';
 
 interface nREPLCompleteMessage {
     op: string;
@@ -20,7 +19,7 @@ interface nREPLInfoMessage {
 interface nREPLEvalMessage {
     op: string;
     file: string;
-    'file-path'?: string,
+    'file-path'?: string;
     session: string;
 }
 
@@ -43,92 +42,93 @@ interface nREPLCloseMessage {
     op: string;
 }
 
-export class nREPLClient {
+const complete = (symbol: string, ns: string, callback): void => {
+    const msg: nREPLCompleteMessage = { op: 'complete', symbol, ns };
+    send(msg).then(respObjs => callback(respObjs[0]));
+};
 
-    private host: string;
-    private port: number;
+const info = (symbol: string, ns: string, callback) => {
+    const msg: nREPLInfoMessage = { op: 'info', symbol, ns };
+    send(msg).then(respObjs => callback(respObjs[0]));
+};
 
-    public constructor(port: number, host: string) {
-        this.host = host;
-        this.port = port;
-    }
+const evaluate = (code: string): Promise<any[]> => clone().then((new_session) => {
+    const session_id = new_session['new-session'];
+    const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
+    return send(msg);
+});
 
-    public complete(symbol: string, ns: string, callback) {
-        const msg: nREPLCompleteMessage = { op: 'complete', symbol: symbol, ns: ns };
-        this.send(msg).then(respObjs => callback(respObjs[0]));
-    }
+const evaluateFile = (code: string, filepath: string): Promise<any[]> => clone().then((new_session) => {
+    const session_id = new_session['new-session'];
+    const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
+    return send(msg);
+});
 
-    public info(symbol: string, ns: string, callback) {
-        const msg: nREPLInfoMessage = { op: 'info', symbol: symbol, ns: ns };
-        this.send(msg).then(respObjs => callback(respObjs[0]));
-    }
+const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-    public eval(code: string): Promise<any[]> {
-        return this.clone().then((new_session) => {
-            const session_id = new_session['new-session'];
-            const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
-            return this.send(msg);
+const clone = (): Promise<any[]> => send({ op: 'clone' }).then(respObjs => respObjs[0]);
+
+const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
+    return send({ op: 'clone' }, connectionInfo)
+        .then(respObjs => respObjs[0])
+        .then(response => {
+            if (!('new-session' in response))
+                return Promise.reject(false);
         });
-    }
+};
 
-    public evalFile(code: string, filepath: string): Promise<any[]> {
-        return this.clone().then((new_session) => {
-            const session_id = new_session['new-session'];
-            const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
-            return this.send(msg);
+const close = (): Promise<any[]> => send({ op: 'close' });
+
+const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
+    return new Promise<any[]>((resolve, reject) => {
+        connection = connection || cljConnection.getConnection();
+
+        if (!connection)
+            return reject('No connection found.');
+
+        const client = net.createConnection(connection.port, connection.host);
+        client.write(bencodeUtil.encode(msg), 'binary');
+
+        client.on('error', error => {
+            client.end();
+            client.removeAllListeners();
+            reject(error);
         });
-    }
 
-    public stacktrace(session: string): Promise<any> {
-        const msg: nREPLStacktraceMessage = { op: 'stacktrace', session: session };
-        return this.send(msg);
-    }
+        let nreplResp = Buffer.from('');
+        const respObjects = [];
+        client.on('data', data => {
+            nreplResp = Buffer.concat([nreplResp, data]);
+            const { decodedObjects, rest } = bencodeUtil.decodeObjects(nreplResp);
+            nreplResp = rest;
+            const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
+                if (!isLastNreplObject(objs))
+                    objs.push(obj);
+                return objs;
+            }, []);
+            respObjects.push(...validDecodedObjects);
 
-    public clone(): Promise<any[]> {
-        const msg = { op: 'clone' };
-        return this.send(msg).then(respObjs => respObjs[0]);
-    }
-
-    public close(): Promise<any[]> {
-        const msg: nREPLCloseMessage = { op: 'close' };
-        return this.send(msg);
-    }
-
-    private send(msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage): Promise<any[]> {
-        return new Promise<any[]>((resolve, reject) => {
-            const client = net.createConnection(this.port, this.host);
-            client.write(bencodeUtil.encode(msg), 'binary');
-
-            client.on('error', error => {
+            if (isLastNreplObject(respObjects)) {
                 client.end();
                 client.removeAllListeners();
-                reject(error);
-            });
-
-            let nreplResp = Buffer.from('');
-            const respObjects = [];
-            client.on('data', data => {
-                nreplResp = Buffer.concat([nreplResp, data]);
-                const { decodedObjects, rest } = bencodeUtil.decodeObjects(nreplResp);
-                nreplResp = rest;
-                const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
-                    if (!isLastNreplObject(objs))
-                        objs.push(obj);
-                    return objs;
-                }, []);
-                respObjects.push(...validDecodedObjects);
-
-                if (isLastNreplObject(respObjects)) {
-                    client.end();
-                    client.removeAllListeners();
-                    resolve(respObjects);
-                }
-            });
+                resolve(respObjects);
+            }
         });
-    }
-}
+    });
+};
 
-function isLastNreplObject(nreplObjects: any[]): boolean {
+const isLastNreplObject = (nreplObjects: any[]): boolean => {
     const lastObj = [...nreplObjects].pop();
     return lastObj && lastObj.status && lastObj.status.indexOf('done') > -1;
 }
+
+export const nreplClient = {
+    complete,
+    info,
+    evaluate,
+    evaluateFile,
+    stacktrace,
+    clone,
+    test,
+    close,
+};

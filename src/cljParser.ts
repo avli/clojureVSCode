@@ -1,5 +1,3 @@
-'use strict';
-
 interface ExpressionInfo {
     functionName: string;
     parameterPosition: number;
@@ -13,7 +11,7 @@ interface RelativeExpressionInfo {
 const CLJ_TEXT_DELIMITER = `"`;
 const CLJ_TEXT_ESCAPE = `\\`;
 const CLJ_COMMENT_DELIMITER = `;`;
-export const R_CLJ_WHITE_SPACE = /\s|,/;
+const R_CLJ_WHITE_SPACE = /\s|,/;
 const R_CLJ_OPERATOR_DELIMITERS = /\s|,|\(|{|\[/;
 
 /** { close_char open_char } */
@@ -24,7 +22,7 @@ const CLJ_EXPRESSION_DELIMITERS: Map<string, string> = new Map<string, string>([
     [CLJ_TEXT_DELIMITER, CLJ_TEXT_DELIMITER],
 ]);
 
-export function getExpressionInfo(text: string): ExpressionInfo {
+const getExpressionInfo = (text: string): ExpressionInfo => {
     text = removeCljComments(text);
     const relativeExpressionInfo = getRelativeExpressionInfo(text);
     if (!relativeExpressionInfo)
@@ -41,9 +39,9 @@ export function getExpressionInfo(text: string): ExpressionInfo {
         functionName,
         parameterPosition: relativeExpressionInfo.parameterPosition,
     };
-}
+};
 
-function removeCljComments(text: string): string {
+const removeCljComments = (text: string): string => {
     const lines = text.match(/[^\r\n]+/g); // split string by line
 
     if (lines.length > 1) {
@@ -65,9 +63,9 @@ function removeCljComments(text: string): string {
     }
 
     return line.substring(0, uncommentedIndex);
-}
+};
 
-function getRelativeExpressionInfo(text: string, openChar: string = `(`): RelativeExpressionInfo {
+const getRelativeExpressionInfo = (text: string, openChar: string = `(`): RelativeExpressionInfo => {
     const relativeExpressionInfo: RelativeExpressionInfo = {
         startPosition: text.length - 1,
         parameterPosition: -1,
@@ -122,12 +120,23 @@ function getRelativeExpressionInfo(text: string, openChar: string = `(`): Relati
     }
 
     return; // reached the beginning of the text without finding the start of the expression
-}
+};
 
-function containsValue(map: Map<any, any>, checkValue: any): boolean {
+const containsValue = (map: Map<any, any>, checkValue: any): boolean => {
     for (let value of map.values()) {
         if (value === checkValue)
             return true;
     }
     return false;
-}
+};
+
+const getNamespace = (text: string): string => {
+    const m = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
+    return m ? m[1] : 'user';
+};
+
+export const cljParser = {
+    R_CLJ_WHITE_SPACE,
+    getExpressionInfo,
+    getNamespace,
+};

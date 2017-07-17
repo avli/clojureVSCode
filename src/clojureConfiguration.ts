@@ -1,5 +1,3 @@
-'use strict';
-
 import * as vscode from 'vscode';
 
 const keywords = [
@@ -62,7 +60,7 @@ const keywords = [
     'alt!!',
     'go',
     'go\\-loop',
-    'thread'
+    'thread',
 ]
 
 export class ClojureLanguageConfiguration implements vscode.LanguageConfiguration {

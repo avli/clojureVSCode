@@ -4,7 +4,13 @@
 
 I'm trying, believe me!
 
-# Supported Features
+## Quickstart
+
+Make sure [Leiningen](https://leiningen.org/) is installed on your machine, open 
+a Clojure file or project, wait until the extension, wait until the extension 
+will start and connect to nREPL and enjoy :-)
+
+## Supported Features
 
 * Code completion
 
@@ -20,18 +26,12 @@ I'm trying, believe me!
 
 ![Code completion example](https://github.com/avli/clojureVSCode/blob/master/images/function%20signature%20example.png)
 
-# Features That Are Not Supported (But Nice to Have)
+## Features That Are not Supported (But Nice to Have)
 
 * Linting
 * [Debug](https://github.com/indiejames/vscode-clojure-debug)
 
-# Quickstart
-
-Make sure [Leiningen](https://leiningen.org/) is installed on your machine, open 
-a Clojure file or project, wait until the extension, wait until the extension 
-will start and connect to nREPL and enjoy :-)
-
-# How To Contribute
+## How to Contribute
 
 Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to 
 propose new features and ideas or to report bugs. If you want to help with some
@@ -39,12 +39,12 @@ code and looking for a place to start, please check out the
 [How to Contribute](https://github.com/avli/clojureVSCode/wiki/Contribution) 
 wiki page.
 
-# Thanks
+## Thanks
 
 - [Thiago Almeida](https://github.com/fasfsfgs)
 - [Mike Ball](https://github.com/mikeball)
 - [Egor Yurtaev](https://github.com/yurtaev)
 
-# License
+## License
 
 [MIT](https://raw.githubusercontent.com/avli/clojureVSCode/master/LICENSE.txt)

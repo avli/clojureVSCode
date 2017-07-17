@@ -1,3 +1,8 @@
+# Version 0.7.0
+
+Adds embedded nREPL functionality – no need to connect manually anymore.
+[21](https://github.com/avli/clojureVSCode/issues/21).
+
 # Version 0.6.1
 
 Adds the forgotten changelog for the version 0.6.0 :-)

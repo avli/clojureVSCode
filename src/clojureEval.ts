@@ -1,53 +1,49 @@
-'use strict';
-
 import * as vscode from 'vscode';
 
-import { nREPLClient } from './nreplClient';
-import { getNamespace } from './clojureProvider';
+import { cljConnection } from './cljConnection';
+import { cljParser } from './cljParser';
+import { nreplClient } from './nreplClient';
 
-export function clojureEval(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
-    evaluate(context, outputChannel, false);
+export function clojureEval(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, false);
 }
 
-export function clojureEvalAndShowResult(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
-    evaluate(context, outputChannel, true);
+export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, true);
 }
 
-function evaluate(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel, showResults: boolean) {
+function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
+    if (!cljConnection.isConnected()) {
+        vscode.window.showWarningMessage('You should connect to nREPL first to evaluate code.');
+        return;
+    }
+
     const editor = vscode.window.activeTextEditor;
     const selection = editor.selection;
 
     let text: string = editor.document.getText();
     if (!selection.isEmpty) {
-        const ns: string = getNamespace(text);
+        const ns: string = cljParser.getNamespace(text);
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
     }
 
-    const port = context.workspaceState.get<number>('port');
-    const host = context.workspaceState.get<string>('host');
-    if ((!port) || (!host)) {
-        vscode.window.showInformationMessage('You should connect to nREPL first to evaluate code.')
-        return;
-    }
-    const nrepl = new nREPLClient(port, host);
-
     const filename = editor.document.fileName;
 
-    nrepl.evalFile(text, filename)
+    nreplClient.evaluateFile(text, filename)
         .then(respObjs => {
             if (!!respObjs[0].ex)
-                return handleError(nrepl, outputChannel, selection, showResults, respObjs[0].session);
+                return handleError(outputChannel, selection, showResults, respObjs[0].session);
 
             return handleSuccess(outputChannel, showResults, respObjs);
         })
-        .then(() => nrepl.close());
+        .then(() => nreplClient.close());
 }
 
-function handleError(nrepl: nREPLClient, outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string) {
+function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
     if (!showResults)
         vscode.window.showErrorMessage('Compilation error');
 
-    return nrepl.stacktrace(session)
+    return nreplClient.stacktrace(session)
         .then(stacktraceObjs => {
             const stacktraceObj = stacktraceObjs[0];
 
@@ -71,7 +67,7 @@ function handleError(nrepl: nREPLClient, outputChannel: vscode.OutputChannel, se
         });
 }
 
-function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]) {
+function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]): void {
     if (!showResults) {
         vscode.window.showInformationMessage('Successfully compiled');
     } else {

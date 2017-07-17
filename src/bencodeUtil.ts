@@ -1,5 +1,3 @@
-'use strict';
-
 import * as bencoder from 'bencoder';
 
 const CONTINUATION_ERROR_MESSAGE: string = "Unexpected continuation: \"";

@@ -1,9 +1,8 @@
-'use strict';
-
 import * as vscode from 'vscode';
 
-import { ClojureProvider } from './clojureProvider';
-import * as cljParser from './cljParser';
+import { cljConnection } from './cljConnection';
+import { cljParser } from './cljParser';
+import { nreplClient } from './nreplClient';
 
 const PARAMETER_OPEN = `[`;
 const PARAMETER_CLOSE = `]`;
@@ -17,20 +16,22 @@ const SPECIAL_FORM_CUSTOM_ARGLISTS: Map<string, string> = new Map<string, string
     [`new`, `([Classname args*])`],
 ]);
 
-export class ClojureSignatureProvider extends ClojureProvider implements vscode.SignatureHelpProvider {
+export class ClojureSignatureProvider implements vscode.SignatureHelpProvider {
 
     provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.SignatureHelp> {
+        if (!cljConnection.isConnected())
+            return Promise.reject('No nREPL connected.');
+
         const textToGetInfo = document.getText(new vscode.Range(new vscode.Position(0, 0), position));
         const exprInfo = cljParser.getExpressionInfo(textToGetInfo);
         if (!exprInfo)
-            return;
+            return Promise.reject('No expression found.');
 
-        const ns = this.getNamespace(document.getText());
-
+        const ns = cljParser.getNamespace(document.getText());
         return new Promise<vscode.SignatureHelp>((resolve, reject) => {
-            this.getNREPL().info(exprInfo.functionName, ns, info => {
+            nreplClient.info(exprInfo.functionName, ns, info => {
                 if (!info.name) // sometimes info brings just a list of suggestions (example: .MAX_VALUE)
-                    return resolve();
+                    return reject('No signature info found.');
 
                 if (!!info['special-form'])
                     return resolve(getSpecialFormSignatureHelp(info, exprInfo.parameterPosition));

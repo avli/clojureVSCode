@@ -14,17 +14,17 @@ will start and connect to nREPL and enjoy :-)
 
 * Code completion
 
-![Code completion example](https://github.com/avli/clojureVSCode/blob/master/images/code%20completion%20example.png)
+![Code completion example](https://github.com/avli/clojureVSCode/raw/master/images/code%20completion%20example.png)
 
 * Code navigation
 
-![Code navigationtion example](https://github.com/avli/clojureVSCode/blob/master/images/code%20navigation%20example.png)
+![Code navigationtion example](https://github.com/avli/clojureVSCode/raw/master/images/code%20navigation%20example.png)
 
 * Interaction with REPL
 * Showing documentation on hover
 * Function signatures
 
-![Code completion example](https://github.com/avli/clojureVSCode/blob/master/images/function%20signature%20example.png)
+![Code completion example](https://github.com/avli/clojureVSCode/raw/master/images/function%20signature%20example.png)
 
 ## Features That Are not Supported (But Nice to Have)
 

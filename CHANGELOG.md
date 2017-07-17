@@ -1,3 +1,7 @@
+# Version 0.7.1
+
+Fixes the links to the images in README.md.
+
 # Version 0.7.0
 
 Adds embedded nREPL functionality – no need to connect manually anymore.

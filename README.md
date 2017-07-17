@@ -6,7 +6,7 @@ I'm trying, believe me!
 
 ## Quickstart
 
-Make sure [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension, wait until the extension will start and connect to nREPL and enjoy :-)
+Make sure that [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension will start nREPL and connect to it - now all the goodies should work :-)
 
 ## Supported Features
 

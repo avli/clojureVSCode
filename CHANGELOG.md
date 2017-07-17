@@ -1,4 +1,8 @@
-# Version 0.7.1
+# Version 0.7.3
+
+Fixes typos in documentation.
+
+# Version 0.7.2
 
 Fixes README.md formatting to display correctly on the Visual Studio Marketplace web-site.
 

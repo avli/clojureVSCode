@@ -8,6 +8,21 @@
         "name": "Andrey Lisin",
         "email": "andrey.lisin@gmail.com"
     },
+    "contributors": [
+        {
+            "name": "Thiago Almeida",
+            "email": "fasfsfgs@gmail.com"
+        },
+        {
+            "name": "Mike Ball",
+            "email": "michaelhball@gmail.com"
+        },
+        {
+            "name": "Egor Yurtaev",
+            "email": "yurtaev.egor+github@gmail.com"
+        }
+    ],
+    "license": "MIT",
     "icon": "images/icon.png",
     "engines": {
         "vscode": "^1.14.0"

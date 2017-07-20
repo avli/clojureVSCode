@@ -1,5 +1,7 @@
 # clojureVSCode
 
+[![Version](https://vsmarketplacebadge.apphb.com/version/avli.clojure.svg)](https://marketplace.visualstudio.com/items?itemName=avli.clojure)
+
 [Clojure](https://clojure.org) support for Visual Studio Code.
 
 I'm trying, believe me!

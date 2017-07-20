@@ -1,3 +1,7 @@
+# Version 0.7.4
+
+Fixes the nREPL connection indicator behavior [42](https://github.com/avli/clojureVSCode/issues/42).
+
 # Version 0.7.3
 
 Fixes typos in documentation.

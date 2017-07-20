@@ -43,6 +43,9 @@ const saveDisconnection = (showMessage: boolean = true): void => {
 
 let loadingHandler: NodeJS.Timer;
 const startLoadingAnimation = () => {
+    if (loadingHandler)
+        return;
+
     const maxAnimationDots: number = 10;
     let animationTime: number = 0;
 
@@ -55,12 +58,19 @@ const startLoadingAnimation = () => {
 };
 
 const stopLoadingAnimation = () => {
-    clearInterval(loadingHandler);
-    connectionIndicator.text = '';
-    connectionIndicator.show();
+    if (loadingHandler) {
+        clearInterval(loadingHandler);
+        loadingHandler = null;
+        connectionIndicator.text = '';
+        connectionIndicator.show();
+    }
 };
 
 const manuallyConnect = (): void => {
+    if (loadingHandler) {
+        vscode.window.showWarningMessage('Already starting a nREPL. Disconnect first.');
+        return;
+    }
     if (isConnected()) {
         vscode.window.showWarningMessage('Already connected to nREPL. Disconnect first.');
         return;
@@ -132,7 +142,8 @@ const startNRepl = (): void => {
 };
 
 const disconnect = (showMessage: boolean = true): void => {
-    if (isConnected()) {
+    if (isConnected() || loadingHandler) {
+        stopLoadingAnimation();
         nreplController.stop();
         saveDisconnection(showMessage);
     } else if (showMessage)

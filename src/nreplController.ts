@@ -46,13 +46,19 @@ const start = (): Promise<CljConnectionInformation> => {
         });
 
         nreplProcess.stderr.on('data', data => {
+            console.info('nrepl stderr =>', data.toString());
+        });
+
+        nreplProcess.on('exit', (code, signal) => {
+            console.info(`nREPL exit => ${code} / Signal: ${signal}`);
             stop();
-            return reject(`This error happened with our nREPL process: ${data}`);
+            return reject();
         });
 
         nreplProcess.on('close', (code, signal) => {
+            console.info(`nREPL close => ${code} / Signal: ${signal}`);
             stop();
-            return reject(`Our nREPL was closed. Code: ${code} / Signal: ${signal}`);
+            return reject();
         });
     });
 };

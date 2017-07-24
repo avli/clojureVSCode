@@ -1,3 +1,7 @@
+# Version 0.7.5
+
+Fixes the `Unable to start nREPL` bug [47](https://github.com/avli/clojureVSCode/issues/47).
+
 # Version 0.7.4
 
 Fixes the nREPL connection indicator behavior [42](https://github.com/avli/clojureVSCode/issues/42).

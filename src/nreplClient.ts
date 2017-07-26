@@ -42,14 +42,14 @@ interface nREPLCloseMessage {
     op: string;
 }
 
-const complete = (symbol: string, ns: string, callback): void => {
+const complete = (symbol: string, ns: string): Promise<any> => {
     const msg: nREPLCompleteMessage = { op: 'complete', symbol, ns };
-    send(msg).then(respObjs => callback(respObjs[0]));
+    return send(msg).then(respObjs => respObjs[0]);
 };
 
-const info = (symbol: string, ns: string, callback) => {
+const info = (symbol: string, ns: string): Promise<any> => {
     const msg: nREPLInfoMessage = { op: 'info', symbol, ns };
-    send(msg).then(respObjs => callback(respObjs[0]));
+    return send(msg).then(respObjs => respObjs[0]);
 };
 
 const evaluate = (code: string): Promise<any[]> => clone().then((new_session) => {

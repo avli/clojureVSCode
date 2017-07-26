@@ -28,16 +28,14 @@ export class ClojureSignatureProvider implements vscode.SignatureHelpProvider {
             return Promise.reject('No expression found.');
 
         const ns = cljParser.getNamespace(document.getText());
-        return new Promise<vscode.SignatureHelp>((resolve, reject) => {
-            nreplClient.info(exprInfo.functionName, ns, info => {
-                if (!info.name) // sometimes info brings just a list of suggestions (example: .MAX_VALUE)
-                    return reject('No signature info found.');
+        return nreplClient.info(exprInfo.functionName, ns).then(info => {
+            if (!info.name) // sometimes info brings just a list of suggestions (example: .MAX_VALUE)
+                return Promise.reject('No signature info found.');
 
-                if (!!info['special-form'])
-                    return resolve(getSpecialFormSignatureHelp(info, exprInfo.parameterPosition));
+            if (!!info['special-form'])
+                return Promise.resolve(getSpecialFormSignatureHelp(info, exprInfo.parameterPosition));
 
-                return resolve(getFunctionSignatureHelp(info, exprInfo.parameterPosition));
-            });
+            return Promise.resolve(getFunctionSignatureHelp(info, exprInfo.parameterPosition));
         });
     }
 

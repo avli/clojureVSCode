@@ -46,7 +46,7 @@ const startLoadingAnimation = () => {
     if (loadingHandler)
         return;
 
-    const maxAnimationDots: number = 10;
+    const maxAnimationDots: number = 3;
     let animationTime: number = 0;
 
     loadingHandler = setInterval(() => {

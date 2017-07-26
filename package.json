@@ -20,7 +20,11 @@
         {
             "name": "Egor Yurtaev",
             "email": "yurtaev.egor+github@gmail.com"
-        }
+        },
+        {
+            "name": "Mark Hansen",
+            "email": "mark@markhansen.co.nz"
+        },
     ],
     "license": "MIT",
     "icon": "images/icon.png",

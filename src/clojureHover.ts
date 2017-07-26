@@ -10,22 +10,19 @@ export class ClojureHoverProvider implements vscode.HoverProvider {
         if (!cljConnection.isConnected())
             return Promise.reject('No nREPL connected.');
 
-        return new Promise<vscode.Hover>((resolve, reject) => {
-            let wordRange = document.getWordRangeAtPosition(position);
-            if (wordRange === undefined) {
-                resolve(new vscode.Hover('Docstring not found'));
-            } else {
-                let currentWord: string;
-                currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
-                const ns = cljParser.getNamespace(document.getText());
+        let wordRange = document.getWordRangeAtPosition(position);
+        if (wordRange === undefined)
+            return Promise.resolve(new vscode.Hover('Docstring not found'));
 
-                nreplClient.info(currentWord, ns, (info) => {
-                    if (info.doc) {
-                        resolve(new vscode.Hover(info.doc));
-                    }
-                    reject();
-                });
+        let currentWord: string;
+        currentWord = document.lineAt(position.line).text.slice(wordRange.start.character, wordRange.end.character);
+        const ns = cljParser.getNamespace(document.getText());
+
+        return nreplClient.info(currentWord, ns).then(info => {
+            if (info.doc) {
+                return Promise.resolve(new vscode.Hover(info.doc));
             }
+            return Promise.reject(undefined);
         });
     }
 

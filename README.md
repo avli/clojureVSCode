@@ -40,6 +40,7 @@ Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to pro
 - [Thiago Almeida](https://github.com/fasfsfgs)
 - [Mike Ball](https://github.com/mikeball)
 - [Egor Yurtaev](https://github.com/yurtaev)
+- [Mark Hansen](https://github.com/mhansen)
 
 ## License
 

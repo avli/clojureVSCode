@@ -1,6 +1,7 @@
 import 'process';
 import * as vscode from 'vscode';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn } from 'cross-spawn';
+import { ChildProcess } from 'child_process';
 
 import { CljConnectionInformation } from './cljConnection';
 

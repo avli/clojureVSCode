@@ -1,6 +1,7 @@
 import 'process';
 import * as vscode from 'vscode';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn } from 'cross-spawn';
+import { ChildProcess } from 'child_process';
 
 import { CljConnectionInformation } from './cljConnection';
 
@@ -33,7 +34,7 @@ const start = (): Promise<CljConnectionInformation> => {
     if (isStarted())
         return Promise.reject({ nreplError: 'nREPL already started.' });
 
-    nreplProcess = spawn('lein', LEIN_ARGS, { cwd: vscode.workspace.rootPath, detached: true });
+    nreplProcess = spawn('lein', LEIN_ARGS, { cwd: vscode.workspace.rootPath });
 
     return new Promise((resolve, reject) => {
         nreplProcess.stdout.addListener('data', data => {

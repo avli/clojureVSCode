@@ -1,3 +1,7 @@
+# Version 0.7.7
+
+Fixes the error with embedded nREPL on Windows.
+
 # Version 0.7.6
 
 Does code refactoring and minor nREPL connection indicator UI fixes.

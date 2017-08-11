@@ -34,7 +34,7 @@ const start = (): Promise<CljConnectionInformation> => {
     if (isStarted())
         return Promise.reject({ nreplError: 'nREPL already started.' });
 
-    nreplProcess = spawn('lein', LEIN_ARGS, { cwd: vscode.workspace.rootPath });
+    nreplProcess = spawn('lein', LEIN_ARGS, { cwd: vscode.workspace.rootPath, detached: true });
 
     return new Promise((resolve, reject) => {
         nreplProcess.stdout.addListener('data', data => {

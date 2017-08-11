@@ -1,3 +1,7 @@
+# Version 0.7.8
+
+Fixes the troubles with a hanging Java process [56](https://github.com/avli/clojureVSCode/issues/56).
+
 # Version 0.7.7
 
 Fixes the error with embedded nREPL on Windows.

@@ -1,4 +1,5 @@
 import 'process';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { spawn } from 'cross-spawn';
 import { ChildProcess } from 'child_process';
@@ -34,7 +35,10 @@ const start = (): Promise<CljConnectionInformation> => {
     if (isStarted())
         return Promise.reject({ nreplError: 'nREPL already started.' });
 
-    nreplProcess = spawn('lein', LEIN_ARGS, { cwd: vscode.workspace.rootPath, detached: true });
+    nreplProcess = spawn('lein', LEIN_ARGS, {
+        cwd: vscode.workspace.rootPath,
+        detached: !(os.platform() === 'win32')
+    });
 
     return new Promise((resolve, reject) => {
         nreplProcess.stdout.addListener('data', data => {

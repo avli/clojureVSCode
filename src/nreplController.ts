@@ -2,7 +2,7 @@ import 'process';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { spawn } from 'cross-spawn';
-import { ChildProcess } from 'child_process';
+import { ChildProcess, exec } from 'child_process';
 
 import { CljConnectionInformation } from './cljConnection';
 
@@ -72,7 +72,12 @@ const stop = () => {
     if (nreplProcess) {
         // Workaround http://azimi.me/2014/12/31/kill-child_process-node-js.html
         nreplProcess.removeAllListeners();
-        process.kill(-nreplProcess.pid);
+        if(os.platform() === 'win32'){
+            exec('taskkill /pid ' + nreplProcess.pid + ' /T /F')
+        }
+        else {
+            process.kill(-nreplProcess.pid);
+        }
         nreplProcess = null;
     }
 };

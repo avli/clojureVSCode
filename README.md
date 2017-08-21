@@ -22,11 +22,12 @@ Make sure that [Leiningen](https://leiningen.org/) is installed on your machine,
 
 * Interaction with REPL
 * Showing documentation on hover
+* Code formatting ([cljfmt](https://github.com/weavejester/cljfmt))
 * Function signatures
 
 ![Code completion example](https://github.com/avli/clojureVSCode/raw/master/images/function%20signature%20example.png)
 
-## Features That Are not Supported (But Nice to Have)
+## Features That Are not Supported (but Nice to Have)
 
 * Linting
 * [Debug](https://github.com/indiejames/vscode-clojure-debug)

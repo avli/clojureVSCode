@@ -1,3 +1,15 @@
+# Version 0.8.0
+
+Adds code formatting support [57](https://github.com/avli/clojureVSCode/issues/57).
+
+# Version 0.7.10
+
+Adds workaround for the hanging Java process issue on the Windows platform [56](https://github.com/avli/clojureVSCode/issues/56).
+
+# Version 0.7.9
+
+Hotfix that detaches nREPL process on UNIX and non-detached one on Windows [56](https://github.com/avli/clojureVSCode/issues/56).
+
 # Version 0.7.8
 
 Fixes the troubles with a hanging Java process [56](https://github.com/avli/clojureVSCode/issues/56).

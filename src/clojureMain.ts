@@ -16,8 +16,10 @@ export function activate(context: vscode.ExtensionContext) {
     cljConnection.setCljContext(context);
     context.subscriptions.push(nreplController);
     cljConnection.disconnect(false);
-
-    cljConnection.startNRepl();
+    var config = vscode.workspace.getConfiguration('clojureVSCode');
+    if (config.autoStartNRepl) {
+        cljConnection.startNRepl();
+    }
 
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
     vscode.commands.registerCommand('clojureVSCode.stopDisconnectNRepl', cljConnection.disconnect);

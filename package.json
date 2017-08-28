@@ -2,7 +2,7 @@
     "name": "clojure",
     "displayName": "Clojure",
     "description": "Clojure nREPL support for Visual Studio Code",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "publisher": "avli",
     "author": {
         "name": "Andrey Lisin",
@@ -28,6 +28,10 @@
         {
             "name": "Fabian Achammer",
             "email": "fabian.achammer@gmail.com"
+        },
+        {
+            "name": "Nikita Prokopov",
+            "email": "prokopov@gmail.com"
         }
     ],
     "license": "MIT",
@@ -77,7 +81,7 @@
                 "clojureVSCode.autoStartNRepl": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Automatically run `lein repl` and connect to it when VS Code loads"
+                    "description": "Automatically run an embedded nREPL instance and connect to it on Clojure file open."
                 }
             }
         }

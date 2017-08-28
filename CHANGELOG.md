@@ -1,3 +1,7 @@
+# Version 0.8.1
+
+Adds a configuration option to disable an embedded nREPL start.
+
 # Version 0.8.0
 
 Adds code formatting support [57](https://github.com/avli/clojureVSCode/issues/57).

@@ -4,6 +4,20 @@ import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
 
+function slashEscape(contents: string) {
+    return contents
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n');
+    }
+
+function slashUnescape(contents: string) {
+    const replacements = {'\\\\': '\\', '\\n': '\n', '\\"': '"'};
+    return contents.replace(/\\(\\|n|")/g, function(match) {
+        return replacements[match];
+    });
+}
+
 export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit): void => {
 
     if (!cljConnection.isConnected()) {
@@ -15,9 +29,7 @@ export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEdito
     let contents: string = selection.isEmpty ? textEditor.document.getText() : textEditor.document.getText(selection);
 
     // Escaping the string before sending it to nREPL
-    contents = contents.replace(/\\/g, '\\\\');
-    contents = contents.replace(/"/g, '\\"');
-    contents = contents.replace(/\n/g, '\\n');
+    contents = slashEscape(contents)
 
     // Running "(require 'cljfmt.core)" in right after we have checked we are connected to nREPL
     // would be a better option but in this case "cljfmt.core/reformat-string" fails the first
@@ -31,10 +43,8 @@ export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEdito
                 return;
             };
             if (('value' in value[1]) && (value[1].value != 'nil')) {
-                const new_content: string = value[1].value.slice(1, -1)
-                    .replace(/\\n/g, '\n')
-                    .replace(/\\"/g, '"')
-                    .replace(/\\\\/g, '\\') // remove quotes, backslashes, and unescape
+                let new_content: string = value[1].value.slice(1, -1);
+                new_content = slashUnescape(new_content);
                 let selection = textEditor.selection;
                 if (textEditor.selection.isEmpty) {
                     const lines: string[] = textEditor.document.getText().split(/\r?\n/g);

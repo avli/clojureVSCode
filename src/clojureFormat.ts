@@ -32,7 +32,7 @@ export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEdito
             };
             if (('value' in value[1]) && (value[1].value != 'nil')) {
                 const new_content: string = value[1].value.slice(1, -1)
-                    .replace(/\\n/g, '\n')
+                    .replace(/(?!\B"[^"]*)\\n(?![^"]*"\B)/g, '\n')
                     .replace(/\\"/g, '"')
                     .replace(/\\\\/g, '\\') // remove quotes, backslashes, and unescape
                 let selection = textEditor.selection;

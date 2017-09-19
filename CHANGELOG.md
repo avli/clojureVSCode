@@ -1,3 +1,7 @@
+# Version 0.8.2
+
+Fixes the issue with unescaping newlines that are parts of a string [64](https://github.com/avli/clojureVSCode/issues/64).
+
 # Version 0.8.1
 
 Adds a configuration option to disable an embedded nREPL start.

@@ -4,6 +4,8 @@
 
 [Clojure](https://clojure.org) and [ClojureScript](https://clojurescript.org) support for Visual Studio Code.
 
+If you are a ClojureScript user, please read [this section](https://github.com/avli/clojureVSCode#clojurescript-project-setup) carefully.
+
 I'm trying, believe me!
 
 ## Quickstart
@@ -58,6 +60,7 @@ Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to pro
 - [Mark Hansen](https://github.com/mhansen)
 - [Fabian Achammer](https://github.com/fachammer)
 - [Nikita Prokopov](https://github.com/tonsky)
+- [Alessandro Decina](https://github.com/alessandrod)
 
 ## License
 

@@ -1,3 +1,7 @@
+# Version 0.9.0
+
+Adds experimental ClojureScript support. Please check out [README.md](https://github.com/avli/clojureVSCode#clojurescript-project-setup) to lean how to use the extension for ClojureScript.
+
 # Version 0.8.2
 
 Fixes the issue with unescaping newlines that are parts of a string [64](https://github.com/avli/clojureVSCode/issues/64).

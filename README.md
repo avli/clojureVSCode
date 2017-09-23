@@ -2,7 +2,7 @@
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/avli.clojure.svg)](https://marketplace.visualstudio.com/items?itemName=avli.clojure)
 
-[Clojure](https://clojure.org) support for Visual Studio Code.
+[Clojure](https://clojure.org) and [ClojureScript](https://clojurescript.org) support for Visual Studio Code.
 
 I'm trying, believe me!
 
@@ -31,6 +31,20 @@ Make sure that [Leiningen](https://leiningen.org/) is installed on your machine,
 
 * Linting
 * [Debug](https://github.com/indiejames/vscode-clojure-debug)
+
+## ClojureScript Project Setup
+
+The extension has the experimental support of ClojureScript. The example of a ClojureScript project setup can be found [here](https://github.com/avli/clojurescript-example-project). Checkout the project `profile.clj` file to learn what dependencies you need.
+
+The embedded nREPL **does not** support ClojureScript, consider to use the "clojureVSCode.autoStartNRepl" setting. You will need to run an nREPL manually and execute the following commands inside it:
+
+```clojure
+(require 'cljs.repl.node)
+(cemerick.piggieback/cljs-repl (cljs.repl.node/repl-env))
+```
+
+After that you can connect to the nREPL using the "Clojure: Connect to a running nREPL" command. Now you can evaluate you ClojureScript code and use the other extension facilities.
+
 
 ## How to Contribute
 

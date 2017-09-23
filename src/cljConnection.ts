@@ -9,9 +9,14 @@ export interface CljConnectionInformation {
     host: string;
     port: number;
 }
+export interface REPLSession {
+    type: 'ClojureScript' | 'Clojure';
+    id: string;
+}
 
 const CONNECTION_STATE_KEY: string = 'CLJ_CONNECTION';
 const DEFAULT_LOCAL_IP: string = '127.0.0.1';
+const CLJS_SESSION_KEY: string = 'CLJS_SESSION';
 const connectionIndicator: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
 let cljContext: vscode.ExtensionContext;
@@ -33,6 +38,7 @@ const saveConnection = (connection: CljConnectionInformation): void => {
 
 const saveDisconnection = (showMessage: boolean = true): void => {
     cljContext.workspaceState.update(CONNECTION_STATE_KEY, undefined);
+    cljContext.workspaceState.update(CLJS_SESSION_KEY, undefined);
 
     connectionIndicator.text = '';
     connectionIndicator.show();
@@ -165,6 +171,52 @@ const getLocalNReplPort = (): number => {
 
 const getPortFromFS = (path: string): number => fs.existsSync(path) ? Number.parseInt(fs.readFileSync(path, 'utf-8')) : NaN;
 
+const findClojureScriptSession = (sessions: string[]): Promise<string> => {
+    if (sessions.length == 0)
+        return Promise.reject(null);
+
+    let base_session = sessions.shift();
+    return nreplClient.evaluate('(js/parseInt "42")', base_session).then(results => {
+        let { session, value } = results[0];
+        nreplClient.close(session);
+        if (value == 42) {
+            return Promise.resolve(base_session);
+        }
+
+        return findClojureScriptSession(sessions);
+    });
+}
+
+const discoverSessions = (): Promise<string> => {
+    return nreplClient.listSessions().then(sessions => {
+        return findClojureScriptSession(sessions).then(cljs_session => {
+            console.log("found ClojureScript session", cljs_session);
+            cljContext.workspaceState.update(CLJS_SESSION_KEY, cljs_session);
+            return cljs_session;
+        }).catch(reason => {
+            cljContext.workspaceState.update(CLJS_SESSION_KEY, undefined);
+            throw reason;
+        });
+    });
+}
+
+const sessionForFilename = (filename: string): Promise<REPLSession> => {
+    return new Promise((resolve, reject) => {
+        const sessionType = filename.endsWith('.cljs') ? "ClojureScript" : "Clojure";
+        if (sessionType == "Clojure") {
+            // Assume that the default session is Clojure. This is always the case with cider.
+            return resolve({ type: sessionType, id: undefined });
+        }
+
+        const session_id = cljContext.workspaceState.get<string>(CLJS_SESSION_KEY);
+        if (session_id)
+            return resolve({ type: sessionType, id: session_id });
+        return discoverSessions().then(session_id => {
+            resolve({ type: sessionType, id: session_id });
+        });
+    });
+}
+
 export const cljConnection = {
     setCljContext,
     getConnection,
@@ -172,4 +224,5 @@ export const cljConnection = {
     manuallyConnect,
     startNRepl,
     disconnect,
+    sessionForFilename
 };

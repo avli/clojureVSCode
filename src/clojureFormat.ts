@@ -9,11 +9,11 @@ function slashEscape(contents: string) {
         .replace(/\\/g, '\\\\')
         .replace(/"/g, '\\"')
         .replace(/\n/g, '\\n');
-    }
+}
 
 function slashUnescape(contents: string) {
-    const replacements = {'\\\\': '\\', '\\n': '\n', '\\"': '"'};
-    return contents.replace(/\\(\\|n|")/g, function(match) {
+    const replacements = { '\\\\': '\\', '\\n': '\n', '\\"': '"' };
+    return contents.replace(/\\(\\|n|")/g, function (match) {
         return replacements[match];
     });
 }
@@ -56,4 +56,20 @@ export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEdito
                 });
             };
         });
+}
+
+export const maybeActivateFormatOnSave = () => {
+    vscode.workspace.onWillSaveTextDocument(e => {
+        const document = e.document;
+        if (document.languageId !== "clojure") {
+            return;
+        }
+        let textEditor = vscode.window.activeTextEditor;
+        let editorConfig = vscode.workspace.getConfiguration('editor');
+        const globalEditorFormatOnSave = editorConfig && editorConfig.has('formatOnSave') && editorConfig.get('formatOnSave') === true;
+        let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
+        if ((clojureConfig.formatOnSave || globalEditorFormatOnSave) && textEditor.document === document) {
+            formatFile(textEditor, null);
+        }
+    });
 }

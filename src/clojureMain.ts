@@ -10,7 +10,7 @@ import { ClojureSignatureProvider } from './clojureSignature';
 import { JarContentProvider } from './jarContentProvider';
 import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
-import { formatFile } from './clojureFormat';
+import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
 
 export function activate(context: vscode.ExtensionContext) {
     cljConnection.setCljContext(context);
@@ -20,7 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.autoStartNRepl) {
         cljConnection.startNRepl();
     }
-
+    
+    maybeActivateFormatOnSave();
+    
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
     vscode.commands.registerCommand('clojureVSCode.stopDisconnectNRepl', cljConnection.disconnect);
     vscode.commands.registerCommand('clojureVSCode.startNRepl', cljConnection.startNRepl);

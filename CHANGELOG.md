@@ -1,3 +1,7 @@
+# Version 0.9.1
+
+Adds a configuration option for formatting code on save.
+
 # Version 0.9.0
 
 Adds experimental ClojureScript support. Please check out [README.md](https://github.com/avli/clojureVSCode#clojurescript-project-setup) to learn how to use the extension for ClojureScript.

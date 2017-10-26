@@ -90,6 +90,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Automatically run an embedded nREPL instance and connect to it on Clojure file open."
+                },
+                "clojureVSCode.formatOnSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Format the code on save."
                 }
             }
         }

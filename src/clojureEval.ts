@@ -12,6 +12,25 @@ export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): v
     evaluate(outputChannel, true);
 }
 
+export function clojureRefreshAllNamespaces(outputChannel: vscode.OutputChannel): void {
+    if (!cljConnection.isConnected()) {
+        vscode.window.showWarningMessage('You should connect to nREPL first to refresh code.');
+        return;
+    }
+
+    console.log("Refreshing namespaces");
+    const editor = vscode.window.activeTextEditor;    
+    cljConnection.sessionForFilename(editor.document.fileName).then(session => {
+        let response = nreplClient.refreshAll(session.id);
+        response.then(respObjs => {
+            if (!!respObjs[0].ex)
+                vscode.window.showErrorMessage('Compilation error');
+
+            return handleSuccess(outputChannel, true, respObjs);
+        })
+    });
+}
+
 function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
     if (!cljConnection.isConnected()) {
         vscode.window.showWarningMessage('You should connect to nREPL first to evaluate code.');

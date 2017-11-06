@@ -66,6 +66,14 @@
                 "title": "Clojure: Eval and show the result"
             },
             {
+                "command": "clojureVSCode.refreshAllNamespaces",
+                "title": "Clojure: Refresh all namespaces"
+            },
+            {
+                "command": "clojureVSCode.runAllTests",
+                "title": "Clojure: Run all tests"
+            },
+            {
                 "command": "clojureVSCode.manuallyConnectToNRepl",
                 "title": "Clojure: Connect to a running nREPL"
             },

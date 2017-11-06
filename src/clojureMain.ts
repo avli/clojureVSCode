@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 
 import { CLOJURE_MODE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
-import { clojureEval, clojureEvalAndShowResult } from './clojureEval';
+import { clojureEval, clojureEvalAndShowResult, clojureRefreshAllNamespaces } from './clojureEval';
+import { clojureRunAllTests } from "./clojureTest";
 import { ClojureDefinitionProvider } from './clojureDefinition';
 import { ClojureLanguageConfiguration } from './clojureConfiguration';
 import { ClojureHoverProvider } from './clojureHover';
@@ -30,7 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
     const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.eval', () => clojureEval(evaluationResultChannel));
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
-
+    vscode.commands.registerCommand('clojureVSCode.refreshAllNamespaces', () => clojureRefreshAllNamespaces(evaluationResultChannel));    
+    vscode.commands.registerCommand('clojureVSCode.runAllTests', () => clojureRunAllTests(evaluationResultChannel));    
+    
     vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
 
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'));

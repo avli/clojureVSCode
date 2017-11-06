@@ -45,6 +45,12 @@ interface nREPLCloseMessage {
     session?: string;
 }
 
+interface nREPLRunAllTestsMessage {
+    op: string;
+    'load?'?: string;
+    session?: string;
+}
+
 const complete = (symbol: string, ns: string): Promise<any> => {
     const msg: nREPLCompleteMessage = { op: 'complete', symbol, ns };
     return send(msg).then(respObjs => respObjs[0]);
@@ -64,6 +70,14 @@ const evaluate = (code: string, session?: string): Promise<any[]> => clone(sessi
 const evaluateFile = (code: string, filepath: string, session?: string): Promise<any[]> => clone(session).then((new_session) => {
     const session_id = new_session['new-session'];
     const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
+    return send(msg);
+});
+
+const runAllTests = (session?: string): Promise<any[]> => send({ op: 'test-all', 'load?': "true", session: session});
+
+const refreshAll = (session?: string): Promise<any[]> => clone(session).then((new_session) => {
+    const session_id = new_session['new-session'];
+    const msg: nREPLRunAllTestsMessage = { op: 'refresh-all', session: session_id };
     return send(msg);
 });
 
@@ -91,7 +105,7 @@ const listSessions = (): Promise<[string]> => {
     });
 }
 
-const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
+const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage | nREPLRunAllTestsMessage, connection?: CljConnectionInformation): Promise<any[]> => {
     return new Promise<any[]>((resolve, reject) => {
         connection = connection || cljConnection.getConnection();
 
@@ -140,6 +154,8 @@ export const nreplClient = {
     info,
     evaluate,
     evaluateFile,
+    runAllTests,
+    refreshAll,
     stacktrace,
     clone,
     test,

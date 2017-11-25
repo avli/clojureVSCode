@@ -39,20 +39,34 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
         }
         response.then(respObjs => {
             if (!!respObjs[0].ex)
-                return handleError(outputChannel, selection, showResults, respObjs[0].session);
+                return handleError(outputChannel, selection, showResults, respObjs);
 
             return handleSuccess(outputChannel, showResults, respObjs);
         })
     });
 }
 
-function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
+function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, respObjs: Array<Object>): Promise<void> {
+    const session = respObjs[0].session
     if (!showResults)
         vscode.window.showErrorMessage('Compilation error');
 
     return nreplClient.stacktrace(session)
         .then(stacktraceObjs => {
             const stacktraceObj = stacktraceObjs[0];
+            const isError = stacktraceObj.status[2] === 'error';
+
+            if (isError) {
+                respObjs.forEach(respObj => {
+                    if (respObj.err) {
+                        outputChannel.appendLine(respObj.err)
+                    }
+                })
+
+                outputChannel.show();
+                nreplClient.close(session);
+                return;
+            }
 
             let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
             let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;

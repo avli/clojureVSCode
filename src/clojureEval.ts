@@ -4,11 +4,19 @@ import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
 
-export function clojureEval(outputChannel: vscode.OutputChannel): void {
+function getAlertOnEvalResult() {
+    const configName = 'aletOnEval';
+    let editorConfig = vscode.workspace.getConfiguration('editor');
+    const globalEditorFormatOnSave = editorConfig && editorConfig.has(configName) && editorConfig.get(configName) === true;
+    let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
+    return ((clojureConfig.aletOnEval || globalEditorFormatOnSave));
+}
+
+export function clojureEval(outputChannel: vscode.OutputChannel): void {        
     evaluate(outputChannel, false);
 }
 
-export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {
+export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {    
     evaluate(outputChannel, true);
 }
 
@@ -46,8 +54,8 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     });
 }
 
-function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
-    if (!showResults)
+export function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
+    if (!showResults && getAlertOnEvalResult())
         vscode.window.showErrorMessage('Compilation error');
 
     return nreplClient.stacktrace(session)
@@ -75,8 +83,8 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
         });
 }
 
-function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]): void {
-    if (!showResults) {
+export function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]): void {
+    if (!showResults && getAlertOnEvalResult()) {
         vscode.window.showInformationMessage('Successfully compiled');
     } else {
         respObjs.forEach(respObj => {

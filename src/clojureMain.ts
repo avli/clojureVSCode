@@ -11,16 +11,17 @@ import { JarContentProvider } from './jarContentProvider';
 import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
+import { reloadNamespaceCommand, getReloadOnFileSave } from './clojureReloadNamespace';
 
 export function activate(context: vscode.ExtensionContext) {
     cljConnection.setCljContext(context);
     context.subscriptions.push(nreplController);
     cljConnection.disconnect(false);
-    var config = vscode.workspace.getConfiguration('clojureVSCode');
+    var config = vscode.workspace.getConfiguration('clojureVSCode');    
     if (config.autoStartNRepl) {
         cljConnection.startNRepl();
     }
-    
+
     maybeActivateFormatOnSave();
     
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
@@ -30,9 +31,8 @@ export function activate(context: vscode.ExtensionContext) {
     const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.eval', () => clojureEval(evaluationResultChannel));
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
-
     vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
-
+    vscode.commands.registerTextEditorCommand('clojureVSCode.reloadNamespace', ()=> { reloadNamespaceCommand(evaluationResultChannel); });
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider()));
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider()));
@@ -40,6 +40,13 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
+
+    if(getReloadOnFileSave()) {
+        vscode.workspace.onDidSaveTextDocument(
+            function (textDocument: vscode.TextDocument) {              
+                reloadNamespaceCommand(evaluationResultChannel);
+            }, this);
+    }
 }
 
 export function deactivate() { }

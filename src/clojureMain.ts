@@ -40,8 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
-
-    console.log(getReloadOnFileSave());
+    
     if(getReloadOnFileSave()) {
         vscode.workspace.onDidSaveTextDocument(
             function (textDocument: vscode.TextDocument) {              

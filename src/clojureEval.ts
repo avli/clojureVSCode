@@ -3,13 +3,10 @@ import * as vscode from 'vscode';
 import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
+import {readBooleanConfiguration} from './utils';
 
 function getAlertOnEvalResult() {
-    const configName = 'aletOnEval';
-    let editorConfig = vscode.workspace.getConfiguration('editor');
-    const globalEditorFormatOnSave = editorConfig && editorConfig.has(configName) && editorConfig.get(configName) === true;
-    let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
-    return ((clojureConfig.aletOnEval || globalEditorFormatOnSave));
+    return readBooleanConfiguration('aletOnEval');
 }
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {        
@@ -18,6 +15,21 @@ export function clojureEval(outputChannel: vscode.OutputChannel): void {
 
 export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {    
     evaluate(outputChannel, true);
+}
+
+export function evaluateText(outputChannel: vscode.OutputChannel, 
+                      showResults: boolean, 
+                      fileName: string,
+                      text: string): Promise<any[]> {    
+    return cljConnection.sessionForFilename(fileName).then(session => {
+        return (fileName.length === 0 && session.type == 'ClojureScript')
+        // Piggieback's evalFile() ignores the text sent as part of the request
+            // and just loads the whole file content from disk. So we use eval()
+            // here, which as a drawback will give us a random temporary filename in
+            // the stacktrace should an exception occur.              
+        ? nreplClient.evaluate(text, session.id)
+        : nreplClient.evaluateFile(text, fileName, session.id);            
+    });
 }
 
 function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
@@ -34,24 +46,13 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
     }
 
-    cljConnection.sessionForFilename(editor.document.fileName).then(session => {
-        let response;
-        if (!selection.isEmpty && session.type == 'ClojureScript') {
-            // Piggieback's evalFile() ignores the text sent as part of the request
-            // and just loads the whole file content from disk. So we use eval()
-            // here, which as a drawback will give us a random temporary filename in
-            // the stacktrace should an exception occur.
-            response = nreplClient.evaluate(text, session.id);
-        } else {
-            response = nreplClient.evaluateFile(text, editor.document.fileName, session.id);
-        }
-        response.then(respObjs => {
-            if (!!respObjs[0].ex)
-                return handleError(outputChannel, selection, showResults, respObjs[0].session);
+    evaluateText(outputChannel, showResults, editor.document.fileName, text)
+            .then(respObjs => {
+                if (!!respObjs[0].ex)
+                    return handleError(outputChannel, selection, showResults, respObjs[0].session);
 
-            return handleSuccess(outputChannel, showResults, respObjs);
-        })
-    });
+                return handleSuccess(outputChannel, showResults, respObjs);
+            });    
 }
 
 export function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {

@@ -1,15 +1,11 @@
 import * as vscode from 'vscode';
 import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
-import { nreplClient } from './nreplClient';
-import { handleError } from './clojureEval';
+import { handleError, evaluateText } from './clojureEval';
+import {readBooleanConfiguration} from './utils';
 
-export function getReloadOnFileSave() {
-    const configName = 'autoReloadNamespaceOnSave';
-    let editorConfig = vscode.workspace.getConfiguration('editor');
-    const globalEditorFormatOnSave = editorConfig && editorConfig.has(configName) && editorConfig.get(configName) === true;
-    let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
-    return ((clojureConfig.autoReloadNamespaceOnSave || globalEditorFormatOnSave));
+export function getReloadOnFileSave() :boolean {
+    return readBooleanConfiguration('autoReloadNamespaceOnSave')
 }
 
 export function reloadNamespaceCommand(        
@@ -25,15 +21,14 @@ export function reloadNamespaceCommand(
     const ns = cljParser.getNamespace(text);
     const commantText = `(require '${ns} :reload)`;
     const fileName = textDocument.fileName;
-    cljConnection.sessionForFilename(fileName).then(session => {
-        let response = nreplClient.evaluateFile(commantText, fileName, session.id);
-        
-        response.then(respObjs => {
-            if (!!respObjs[0].ex)
-                return handleError(outputChannel, 
-                                   new vscode.Selection(0,0,0,0), 
-                                   false, 
-                                   respObjs[0].session);
-        })
-    });
+
+    evaluateText(outputChannel, false, fileName, commantText)
+        .then(respObjs => {
+            return (!!respObjs[0].ex)
+                    ? Promise.reject(handleError(outputChannel, 
+                                    new vscode.Selection(0,0,0,0), 
+                                    false, 
+                                    respObjs[0].session))
+                    : Promise.resolve();
+        })    
 }

@@ -17,10 +17,14 @@ export function reloadNamespaceCommand(
     }
 
     const textDocument = vscode.window.activeTextEditor.document;
+    const fileName = textDocument.fileName;
+    if(!fileName.endsWith(".clj")) {
+        return;
+    }
+
     const text = textDocument.getText();
     const ns = cljParser.getNamespace(text);
-    const commantText = `(require '${ns} :reload)`;
-    const fileName = textDocument.fileName;
+    const commantText = `(require '${ns} :reload)`;    
 
     evaluateText(outputChannel, false, fileName, commantText)
         .then(respObjs => {

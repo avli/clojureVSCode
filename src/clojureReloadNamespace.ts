@@ -25,10 +25,11 @@ export function reloadNamespaceCommand(
     evaluateText(outputChannel, false, fileName, commantText)
         .then(respObjs => {
             return (!!respObjs[0].ex)
-                    ? Promise.reject(handleError(outputChannel, 
-                                    new vscode.Selection(0,0,0,0), 
-                                    false, 
-                                    respObjs[0].session))
+                    ? handleError(outputChannel, 
+                                new vscode.Selection(0,0,0,0), 
+                                false, 
+                                respObjs[0].session)
+                            .then(value=>Promise.reject(value))                            
                     : Promise.resolve();
         })    
 }

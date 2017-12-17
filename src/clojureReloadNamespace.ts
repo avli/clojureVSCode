@@ -11,8 +11,7 @@ export function getReloadOnFileSave() :boolean {
 export function reloadNamespaceCommand(        
     outputChannel: vscode.OutputChannel) {
 
-    if (!cljConnection.isConnected()) {
-        vscode.window.showWarningMessage('You should connect to nREPL first to reload namespace.');
+    if (!cljConnection.isConnected()) {        
         return;
     }
 

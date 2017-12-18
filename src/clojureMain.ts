@@ -12,8 +12,10 @@ import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
 import { reloadNamespaceCommand, getReloadOnFileSave } from './clojureReloadNamespace';
+import { ClojureLintingProvider } from './clojureLintingProvider';
 
 export function activate(context: vscode.ExtensionContext) {
+    
     cljConnection.setCljContext(context);
     context.subscriptions.push(nreplController);
     cljConnection.disconnect(false);
@@ -47,6 +49,9 @@ export function activate(context: vscode.ExtensionContext) {
                 reloadNamespaceCommand(evaluationResultChannel);
             }, this);
     }
+
+    let linter = new ClojureLintingProvider;	
+	linter.activate(context.subscriptions);
 }
 
 export function deactivate() { }

@@ -6,12 +6,32 @@ import { Diagnostic, Range, TextDocument } from 'vscode';
 import { cljParser } from './cljParser';
 import { CLOJURE_MODE } from './clojureMode';
 
-interface LinterResult {
-    
-    msg: string;
+interface LinterWarningResult {
+	
+	msg: string;
     line: number;
     column: number;
     linter: string;
+}
+
+interface LinterErrorData {
+	column: number;
+	"end-column": number;
+	line: number;
+	"end-line": number;
+	file: string;
+}
+
+interface LinterError {
+	cause: string;
+	data: LinterErrorData;
+}
+
+interface LinterResult {
+	
+	err: string;
+	"err-data": LinterError;
+    warnings: LinterWarningResult[];
 }
 
 const errorsSeverity: string[] = ["bad-arglists", 
@@ -42,17 +62,19 @@ export class ClojureLintingProvider {
 	private getLintCommand(ns): string {		
 		return `(do (require '[eastwood.lint])
 					(require '[clojure.data.json])					
-					(->> 
-						(eastwood.lint/lint {:namespaces ['${ns}]}) 
-						:warnings 
-						(map #(select-keys % [:msg :line :column :linter]))
-						(vec)
+					(-> ;(eastwood.lint/lint {:namespaces ['${ns}]}) 	
+						(eastwood.lint/lint {:namespaces ['madlan.server.sms-api]}) 						
+						(select-keys [:warnings :err :err-data])
+						(update :warnings (fn [x] (map #(select-keys % [:msg :line :column :linter]) x)))	
+						(update :err-data :exception)
+						(update :err-data Throwable->map)						
+						(update :err-data #(select-keys % [:cause :data]))
 						(clojure.data.json/write-str)))`;
 	}	
 
 	private diagnosticCollection: vscode.DiagnosticCollection;	
 
-	private parseLintSuccessResponse(response: string): LinterResult[] {
+	private parseLintSuccessResponse(response: string): LinterResult {
 		
 		const parsedToString = JSON.parse(response);		
 		return JSON.parse(parsedToString);		
@@ -71,14 +93,36 @@ export class ClojureLintingProvider {
 		}
 	}
 
-    private createDiagnosticFromLintResult(document: TextDocument, warning: LinterResult): Diagnostic {
+    private createDiagnosticFromLintResult(document: TextDocument, warning: LinterWarningResult): Diagnostic {
 		const blockRange = cljParser.getBlockRange(document, warning.line, warning.column);		
 		const severity = this.getSeverity(warning.linter);
         return new Diagnostic(blockRange, warning.msg, severity);
     }
 
-	private createDiagnosticCollectionFromLintResult(document: TextDocument, result: LinterResult[]): Diagnostic[] {
-        return result.map((item)=>{ return this.createDiagnosticFromLintResult(document, item); });
+	private createDiagnosticCollectionFromLintResult(document: TextDocument, result: LinterResult): Diagnostic[] {
+		let warnings = result.warnings.map((item)=>{ return this.createDiagnosticFromLintResult(document, item); });		
+		if(result.err) {
+			const errData = result['err-data'];
+			if(document.fileName.endsWith(errData.data.file)) {
+				warnings.push({				
+					range: new Range(errData.data.line, errData.data.column, errData.data['end-line'], errData.data['end-column']),
+					message: errData.cause,
+					source: "Linter Exception",
+					severity: vscode.DiagnosticSeverity.Error,
+					code: -1
+				});
+			} else {
+				warnings.push({				
+					range: new Range(1, 1, 1, 1),
+					message: `Exception from different namespace ${errData.data.file};${errData.data.line}:${errData.data.column} - ${errData.cause}`,
+					source: "Linter Exception",
+					severity: vscode.DiagnosticSeverity.Error,
+					code: -1
+				});
+			};
+		}
+
+		return warnings;
 	}
 
 	private lint(textDocument: vscode.TextDocument) :void {		
@@ -88,23 +132,23 @@ export class ClojureLintingProvider {
 
 		nreplConnection.cljConnection
 			 .sessionForFilename(textDocument.fileName)
-			 .then(value=>{                
-                const ns = cljParser.getNamespace(textDocument.getText());
-                cljParser.getExpressionInfo
+			 .then(value => {                
+                const ns = cljParser.getNamespace(textDocument.getText());                
 				if(ns.length > 0) {
-				const command = this.getLintCommand(ns);
-				nreplClient.evaluate(command)
-						   .then(result => {
-								try {
-								let warnings: LinterResult[] = this.parseLintSuccessResponse(result[0].value);
-								const diagnostics = this.createDiagnosticCollectionFromLintResult(textDocument, warnings);
-								this.diagnosticCollection.set(textDocument.uri, diagnostics);
-								} catch(e) {
-									console.error(e);
-								}
-						   }, err=> {
-							   console.error(err);
-						   });
+						const command = this.getLintCommand(ns);
+						nreplClient.evaluate(command)
+								   .then(result => {
+											try {												
+												let lintResult: LinterResult = this.parseLintSuccessResponse(result[0].value);														
+												const diagnostics = this.createDiagnosticCollectionFromLintResult(textDocument, lintResult);
+												this.diagnosticCollection.set(textDocument.uri, diagnostics);
+											} catch(e) {
+												console.error(e);
+											}
+
+									}, err=> {
+										console.error(err);
+									});
 				}
              });		
 	}

@@ -153,7 +153,10 @@ export class ClojureLintingProvider {
 			this.diagnosticCollection.delete(textDocument.uri);
 		}, null, subscriptions);
 
-		vscode.workspace.onDidSaveTextDocument(this.lint, this);
+		vscode.workspace.onDidSaveTextDocument((textDocument: vscode.TextDocument) => {
+				this.diagnosticCollection.delete(textDocument.uri);
+				this.lint(textDocument);
+		}, this);
 	}
 	
 	public dispose(): void {

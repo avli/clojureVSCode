@@ -105,7 +105,7 @@ export class ClojureLintingProvider {
 			const errData = result['err-data'];
 			if(document.fileName.endsWith(errData.data.file)) {
 				warnings.push({				
-					range: new Range(errData.data.line - 1, errData.data.column, errData.data['end-line'] - 1, errData.data['end-column']),
+					range: new Range(errData.data.line - 1, errData.data.column - 1, errData.data['end-line'] - 1, errData.data['end-column'] - 1),
 					message: errData.cause,
 					source: "Linter Exception",
 					severity: vscode.DiagnosticSeverity.Error,

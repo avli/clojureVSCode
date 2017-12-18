@@ -95,7 +95,7 @@ export class ClojureLintingProvider {
 
     private createDiagnosticFromLintResult(document: TextDocument, warning: LinterWarningResult): Diagnostic {
 		const blockRange = cljParser.getBlockRange(document, warning.line, warning.column);		
-		const severity = this.getSeverity(warning.linter);
+		const severity = this.getSeverity(warning.linter);		
         return new Diagnostic(blockRange, warning.msg, severity);
     }
 
@@ -105,22 +105,13 @@ export class ClojureLintingProvider {
 			const errData = result['err-data'];
 			if(document.fileName.endsWith(errData.data.file)) {
 				warnings.push({				
-					range: new Range(errData.data.line, errData.data.column, errData.data['end-line'], errData.data['end-column']),
+					range: new Range(errData.data.line - 1, errData.data.column, errData.data['end-line'] - 1, errData.data['end-column']),
 					message: errData.cause,
 					source: "Linter Exception",
 					severity: vscode.DiagnosticSeverity.Error,
 					code: -1
 				});
-			} else {
-				warnings.push({				
-					range: new Range(1, 1, 1, 1),
-					message: `Exception from different namespace ${errData.data.file};${errData.data.line}:${errData.data.column} - ${errData.cause}`,
-					source: "Linter Exception",
-					severity: vscode.DiagnosticSeverity.Error,
-					code: -1
-				});
-			};
-		}
+			}}		
 
 		return warnings;
 	}

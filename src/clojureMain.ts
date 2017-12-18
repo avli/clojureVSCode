@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
             }, this);
     }
 
-    let linter = new ClojureLintingProvider;	
+    let linter = new ClojureLintingProvider(evaluationResultChannel);	
 	linter.activate(context.subscriptions);
 }
 

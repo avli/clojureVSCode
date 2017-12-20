@@ -86,7 +86,7 @@
                 "title": "Clojure: Format file or selection"
             },
             {
-                "command": "reloadNamespace",
+                "command": "clojureVSCode.reloadNamespace",
                 "title": "reload the current namespace"
             }
         ],

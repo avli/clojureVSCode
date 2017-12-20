@@ -138,7 +138,7 @@ const getNamespace = (text: string): string => {
 };
 
 //assume the position is before the block directly
-const getBlockRange = (editor: TextDocument, line: number, column: number): Range => {
+const getDirectlyBeforeBlockRange = (editor: TextDocument, line: number, column: number): Range => {
     const lastLineNumber = editor.lineCount - 1;
     const lastLine = editor.lineAt(lastLineNumber);    
     const range = new Range(line, column, lastLineNumber, lastLine.range.end.character);
@@ -172,5 +172,5 @@ export const cljParser = {
     R_CLJ_WHITE_SPACE,
     getExpressionInfo,
     getNamespace,
-    getBlockRange
+    getDirectlyBeforeBlockRange
 };

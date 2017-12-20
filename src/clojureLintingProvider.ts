@@ -25,6 +25,7 @@ interface LinterErrorData {
 
 interface LinterError {
 	cause: string;
+	trace: number;
 	data: LinterErrorData;
 }
 
@@ -66,8 +67,7 @@ export class ClojureLintingProvider {
 		this.outputChannel = channel;
 	}
 
-	private getLintCommand(ns): string {		
-		console.log(ns);
+	private getLintCommand(ns: string): string {			
 		return `(do (require '[eastwood.lint])
 					(require '[clojure.data.json])					
 					(-> (eastwood.lint/lint {:namespaces ['${ns}]})
@@ -78,7 +78,14 @@ export class ClojureLintingProvider {
 							 (if-let [err-data (:err-data data)]
 									 (-> data
 										 (update :err-data Throwable->map)						
-										 (update :err-data #(select-keys % [:cause :data])))
+										 (update :err-data #(select-keys % [:cause :data :trace]))
+										 (update-in [:err-data :trace] 
+													(fn [trace]
+														(->> trace															 
+															 (filter #(clojure.string/starts-with? (.getClassName %) (str "${ns}" "$")))
+															 (first)
+															 ((fn [x] (if x (.getLineNumber x)))))))
+										(or data))
 									 data)))
 						(clojure.data.json/write-str)))`;
 	}	
@@ -104,22 +111,30 @@ export class ClojureLintingProvider {
 	}
 
     private createDiagnosticFromLintResult(document: TextDocument, warning: LinterWarningResult): Diagnostic {
-		const blockRange = cljParser.getBlockRange(document, warning.line, warning.column);		
+		const blockRange = cljParser.getDirectlyBeforeBlockRange(document, warning.line, warning.column);		
 		const severity = this.getSeverity(warning.linter);		
         return new Diagnostic(blockRange, warning.msg, severity);
     }
 
 	private createDiagnosticCollectionFromLintResult(document: TextDocument, result: LinterResult): Diagnostic[] {
-		let warnings = result.warnings.map((item)=>{ return this.createDiagnosticFromLintResult(document, item); });		
-		if(result.err) {
+		let warnings = result.warnings.map((item)=>{ return this.createDiagnosticFromLintResult(document, item); });				
+		if(result.err) {						
 			const errData = result['err-data'];
-			if(document.fileName.endsWith(errData.data.file)) {
+			if(errData.data != null && document.fileName.endsWith(errData.data.file)) {
 				const startLine = errData.data.line - 1;
 				const startChar = errData.data.column - 1;
 				const endLine = errData.data['end-line'] == null ? startLine : errData.data['end-line'] - 1;
-				const endChar = errData.data['end-column'] == null ? startChar : errData.data['end-column'] - 1;
-				warnings.push({				
+				const endChar = errData.data['end-column'] == null ? startChar : errData.data['end-column'] - 1;				
+				warnings.push({								
 					range: new Range(errData.data.line - 1, errData.data.column - 1, endLine, endChar),
+					message: errData.cause,
+					source: "Linter Exception",
+					severity: vscode.DiagnosticSeverity.Error,
+					code: -1
+				});
+			} else {																		
+				warnings.push({														
+					range: new Range(errData.trace - 1, 0, errData.trace - 1, 0),
 					message: errData.cause,
 					source: "Linter Exception",
 					severity: vscode.DiagnosticSeverity.Error,
@@ -131,7 +146,7 @@ export class ClojureLintingProvider {
 	}
 
 	private lint(textDocument: vscode.TextDocument) :void {		
-		if (textDocument.languageId !== CLOJURE_MODE.language && nreplConnection.cljConnection.isConnected) {
+		if (textDocument.languageId !== CLOJURE_MODE.language || !nreplConnection.cljConnection.isConnected) {
 			return;
 		}
 
@@ -142,14 +157,15 @@ export class ClojureLintingProvider {
 				if(ns.length > 0) {
 						const command = this.getLintCommand(ns);
 						nreplClient.evaluate(command)
-								   .then(result => {
+								   .then(result => {									   		
 											try {												
-												if(!!result[0].ex) {
+												if(!!result[0].ex) {		
+													console.log(result);
 													handleError(this.outputChannel, 
 														new vscode.Selection(0,0,0,0), 
 														false, 
 														result[0].session);													
-												} else {
+												} else {																					
 													let lintResult: LinterResult = this.parseLintSuccessResponse(result[0].value);
 													const diagnostics = this.createDiagnosticCollectionFromLintResult(textDocument, lintResult);
 													this.diagnosticCollection.set(textDocument.uri, diagnostics);

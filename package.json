@@ -40,6 +40,10 @@
         {
             "name": "Alessandro Decina",
             "email": "alessandro.d@gmail.com"
+        },
+        {
+            "name": "Barak Liato",
+            "email": "barakliato@gmail.com"
         }
     ],
     "license": "MIT",
@@ -80,6 +84,10 @@
             {
                 "command": "clojureVSCode.formatFile",
                 "title": "Clojure: Format file or selection"
+            },
+            {
+                "command": "reloadNamespace",
+                "title": "reload the current namespace"
             }
         ],
         "configuration": {
@@ -95,6 +103,16 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Format the code on save."
+                },
+                "clojureVSCode.alertOnEval": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "show pop up alert on eval."
+                },
+                "clojureVSCode.autoReloadNamespaceOnSave": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "auto reload the file upon save."
                 }
             }
         }

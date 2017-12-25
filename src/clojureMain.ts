@@ -13,6 +13,7 @@ import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
 import { reloadNamespaceCommand, getReloadOnFileSave } from './clojureReloadNamespace';
 import { ClojureLintingProvider } from './clojureLintingProvider';
+import { searchSymbol } from './searchSymbolCommand';
 
 export function activate(context: vscode.ExtensionContext) {
     
@@ -35,6 +36,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
     vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
     vscode.commands.registerTextEditorCommand('clojureVSCode.reloadNamespace', ()=> { reloadNamespaceCommand(evaluationResultChannel); });
+    
+    
+    vscode.commands.registerCommand('clojureVSCode.clojureVSCode.searchSymbol', searchSymbol);
+
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider()));
     context.subscriptions.push(vscode.languages.registerHoverProvider(CLOJURE_MODE, new ClojureHoverProvider()));

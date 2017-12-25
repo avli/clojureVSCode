@@ -134,8 +134,9 @@ export class ClojureLintingProvider {
 					code: -1
 				});
 			} else {
+				const line = errData.trace != null ? 0 : 0;
 				warnings.push({
-					range: new Range(errData.trace - 1, 0, errData.trace - 1, 0),
+					range: new Range(line, 0, line, 0),
 					message: errData.cause,
 					source: "Linter Exception",
 					severity: vscode.DiagnosticSeverity.Error,

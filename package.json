@@ -56,7 +56,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:clojure"
+        "onCommand:clojureVSCode.startNRepl",
+        "onCommand:clojureVSCode.manuallyConnectToNRepl"
     ],
     "main": "./out/src/clojureMain",
     "contributes": {

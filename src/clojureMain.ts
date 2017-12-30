@@ -13,7 +13,7 @@ import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
 import { reloadNamespaceCommand, getReloadOnFileSave } from './clojureReloadNamespace';
 import { ClojureLintingProvider } from './clojureLintingProvider';
-import { searchSymbol } from './searchSymbolCommand';
+import { ClojureReferenceProvider } from './clojureReferenceProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     
@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerTextEditorCommand('clojureVSCode.reloadNamespace', ()=> { reloadNamespaceCommand(evaluationResultChannel); });
     
     
-    vscode.commands.registerCommand('clojureVSCode.clojureVSCode.searchSymbol', searchSymbol);
+    //vscode.commands.registerTextEditorCommand('clojureVSCode.searchSymbol', searchSymbol);
 
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider()));
@@ -56,7 +56,17 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     let linter = new ClojureLintingProvider(evaluationResultChannel);	
-	linter.activate(context.subscriptions);
+    linter.activate(context.subscriptions);        
+
+    context.subscriptions.push(
+        vscode.languages.registerReferenceProvider(
+            CLOJURE_MODE, new ClojureReferenceProvider()
+        )
+    );
+
+    // context.subscriptions.push(
+    //     vscode.languages.registerReferenceProvider()
+    //         CLOJURE_MODE, new ClojureCompletionItemProvider(), ''));
 }
 
 export function deactivate() { }

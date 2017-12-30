@@ -89,6 +89,10 @@
             {
                 "command": "clojureVSCode.reloadNamespace",
                 "title": "reload the current namespace"
+            },
+            {
+                "command": "clojureVSCode.searchSymbol",
+                "title": "Try to find the symbol and add its namespace to the decleration"
             }
         ],
         "configuration": {

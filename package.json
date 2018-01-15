@@ -2,7 +2,7 @@
     "name": "clojure",
     "displayName": "Clojure",
     "description": "Clojure nREPL support for Visual Studio Code",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "publisher": "avli",
     "author": {
         "name": "Andrey Lisin",

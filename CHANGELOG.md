@@ -1,3 +1,7 @@
+# Version 0.9.2
+
+Adds Clojure 1.9 support.
+
 # Version 0.9.1
 
 Adds a configuration option for formatting code on save.

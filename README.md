@@ -12,6 +12,8 @@ I'm trying, believe me!
 
 Make sure that [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension will start nREPL and connect to it - now all the goodies should work :-)
 
+Doesn't work? Not exactly what you need? See the [Manual Configuration section](#manual-configuration)!
+
 ## Supported Features
 
 * Code completion
@@ -33,6 +35,26 @@ Make sure that [Leiningen](https://leiningen.org/) is installed on your machine,
 
 * Linting
 * [Debug](https://github.com/indiejames/vscode-clojure-debug)
+
+## Manual Configuration
+
+The method from the [Quickstart section](#Quickstart) utilizes the so-called embedded nREPL that is run as an internal process. Sometimes you need more control on your development environment. In this case you can disable the automatical firing of the embedded nREPL by setting the
+
+```json
+
+"clojureVSCode.autoStartNRepl": true
+
+```
+
+option in your VSCode settings globally or per-project and connect manually to whichever REPL instance you want by "Clojure: Connect to a running nREPL" command. Note, that in order to make the autocompletion, go to definition, and formatting functionality work you have to write necessary dependencies in your `profiles.clj`. Put the following content to your `~/.lein/profiles.clj` for macOS and Linux:
+
+```clojure
+{:user {:plugins  [[cider/cider-nrepl "0.15.1"]]
+       :dependencies [[org.clojure/tools.nrepl "0.2.12"]
+                      [cljfmt "0.5.7"]]}}
+```
+
+Alternetively, you can put the code above to your project `project.clj` file.
 
 ## ClojureScript Project Setup
 

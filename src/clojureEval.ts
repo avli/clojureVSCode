@@ -1,58 +1,61 @@
-'use strict';
-
 import * as vscode from 'vscode';
 
-import { nREPLClient } from './nreplClient';
-import { getNamespace } from './clojureProvider';
+import { cljConnection } from './cljConnection';
+import { cljParser } from './cljParser';
+import { nreplClient } from './nreplClient';
 
-export function clojureEval(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
-    evaluate(context, outputChannel, false);
+export function clojureEval(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, false);
 }
 
-export function clojureEvalAndShowResult(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel) {
-    evaluate(context, outputChannel, true);
+export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, true);
 }
 
-function evaluate(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel, showResults: boolean) {
+function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
+    if (!cljConnection.isConnected()) {
+        vscode.window.showWarningMessage('You should connect to nREPL first to evaluate code.');
+        return;
+    }
+
     const editor = vscode.window.activeTextEditor;
     const selection = editor.selection;
-
-    let text: string = editor.document.getText();
+    let text = editor.document.getText();
     if (!selection.isEmpty) {
-        const ns: string = getNamespace(text);
+        const ns: string = cljParser.getNamespace(text);
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
     }
 
-    const port = context.workspaceState.get<number>('port');
-    const host = context.workspaceState.get<string>('host');
-    if ((!port) || (!host)) {
-        vscode.window.showInformationMessage('You should connect to nREPL first to evaluate code.')
-        return;
-    }
-    const nrepl = new nREPLClient(port, host);
-
-    const filename = editor.document.fileName;
-
-    nrepl.evalFile(text, filename)
-        .then(respObjs => {
+    cljConnection.sessionForFilename(editor.document.fileName).then(session => {
+        let response;
+        if (!selection.isEmpty && session.type == 'ClojureScript') {
+            // Piggieback's evalFile() ignores the text sent as part of the request
+            // and just loads the whole file content from disk. So we use eval()
+            // here, which as a drawback will give us a random temporary filename in
+            // the stacktrace should an exception occur.
+            response = nreplClient.evaluate(text, session.id);
+        } else {
+            response = nreplClient.evaluateFile(text, editor.document.fileName, session.id);
+        }
+        response.then(respObjs => {
             if (!!respObjs[0].ex)
-                return handleError(nrepl, outputChannel, selection, showResults, respObjs[0].session);
+                return handleError(outputChannel, selection, showResults, respObjs[0].session);
 
             return handleSuccess(outputChannel, showResults, respObjs);
         })
-        .then(() => nrepl.close());
+    });
 }
 
-function handleError(nrepl: nREPLClient, outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string) {
+function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Selection, showResults: boolean, session: string): Promise<void> {
     if (!showResults)
         vscode.window.showErrorMessage('Compilation error');
 
-    return nrepl.stacktrace(session)
+    return nreplClient.stacktrace(session)
         .then(stacktraceObjs => {
             const stacktraceObj = stacktraceObjs[0];
 
-            let errLine = stacktraceObj.line - 1;
-            let errChar = stacktraceObj.column - 1;
+            let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
+            let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;
 
             if (!selection.isEmpty) {
                 errLine += selection.start.line;
@@ -68,19 +71,23 @@ function handleError(nrepl: nREPLClient, outputChannel: vscode.OutputChannel, se
             });
 
             outputChannel.show();
+            nreplClient.close(session);
         });
 }
 
-function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]) {
+function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]): void {
     if (!showResults) {
         vscode.window.showInformationMessage('Successfully compiled');
     } else {
         respObjs.forEach(respObj => {
             if (respObj.out)
                 outputChannel.append(respObj.out);
+            if (respObj.err)
+                outputChannel.append(respObj.err);
             if (respObj.value)
                 outputChannel.appendLine(`=> ${respObj.value}`);
             outputChannel.show();
         });
     }
+    nreplClient.close(respObjs[0].session);
 }

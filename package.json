@@ -40,6 +40,10 @@
         {
             "name": "Alessandro Decina",
             "email": "alessandro.d@gmail.com"
+        },
+        {
+            "name": "Barak Liato",
+            "email": "barakliato@gmail.com"
         }
     ],
     "license": "MIT",
@@ -52,7 +56,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:clojure"
+        "onCommand:clojureVSCode.startNRepl",
+        "onCommand:clojureVSCode.manuallyConnectToNRepl"
     ],
     "main": "./out/src/clojureMain",
     "contributes": {
@@ -80,6 +85,14 @@
             {
                 "command": "clojureVSCode.formatFile",
                 "title": "Clojure: Format file or selection"
+            },
+            {
+                "command": "clojureVSCode.reloadNamespace",
+                "title": "reload the current namespace"
+            },
+            {
+                "command": "clojureVSCode.searchSymbol",
+                "title": "Try to find the symbol and add its namespace to the decleration"
             }
         ],
         "configuration": {
@@ -95,6 +108,16 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Format the code on save."
+                },
+                "clojureVSCode.alertOnEval": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "show pop up alert on eval."
+                },
+                "clojureVSCode.autoReloadNamespaceOnSave": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "auto reload the file upon save."
                 }
             }
         }

@@ -1,3 +1,5 @@
+import { TextDocument, Range, Position, CompletionList } from "vscode";
+
 interface ExpressionInfo {
     functionName: string;
     parameterPosition: number;
@@ -135,8 +137,40 @@ const getNamespace = (text: string): string => {
     return m ? m[1] : 'user';
 };
 
+//assume the position is before the block directly
+const getDirectlyBeforeBlockRange = (editor: TextDocument, line: number, column: number): Range => {
+    const lastLineNumber = editor.lineCount - 1;
+    const lastLine = editor.lineAt(lastLineNumber);    
+    const range = new Range(line, column, lastLineNumber, lastLine.range.end.character);
+    const text = editor.getText(range);
+    
+    let count = 0;     
+    let endPosition = new Position(line, column);
+    let c = column;
+    for(let l = line; l < range.end.line;) {
+        const currentLine = editor.lineAt(l);
+        for(;c < currentLine.range.end.character;c++) {
+            if(text[c] === '(')
+                 count++;
+
+            if(text[c] === ')')
+                count--;
+        }
+
+        if(count === 0) {
+            return new Range(line - 1, column, l - 1, c);
+        }
+
+        l++;
+        c = 0;
+    }
+
+    return new Range(line, column, line, column);
+}
+
 export const cljParser = {
     R_CLJ_WHITE_SPACE,
     getExpressionInfo,
     getNamespace,
+    getDirectlyBeforeBlockRange
 };

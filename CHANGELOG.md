@@ -1,3 +1,7 @@
+# Version 0.9.3
+
+Adds support of `cljfmt` options.
+
 # Version 0.9.2
 
 Adds Clojure 1.9 support.

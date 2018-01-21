@@ -56,6 +56,16 @@ option in your VSCode settings globally or per-project and connect manually to w
 
 Alternetively, you can put the code above to your project `project.clj` file.
 
+## Contributed Configuration
+
+The extension contributes the configuration parameters listed in the table below.
+
+| Parameter                      | Description |
+|--------------------------------|-------------|
+|`clojureVSCode.autoStartNRepl`  | Whether to start an nREPL when opening a file or project. |
+|`clojureVSCode.formatOnSave`    | Format files with [cljfmt](https://github.com/weavejester/cljfmt) on save. |
+|`clojureVSCode.cljfmtParameters`| Formatting parameters passed to `cljfmt` each time it runs, e.g. `:indentation? true :remove-surrounding-whitespace? false` |
+
 ## ClojureScript Project Setup
 
 The extension has the experimental support of ClojureScript. The example of a ClojureScript project setup can be found [here](https://github.com/avli/clojurescript-example-project). Checkout the project `profile.clj` file to learn what dependencies you need.

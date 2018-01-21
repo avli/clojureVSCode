@@ -31,12 +31,17 @@ export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEdito
     // Escaping the string before sending it to nREPL
     contents = slashEscape(contents)
 
+
+    let cljfmtParams = vscode.workspace.getConfiguration('clojureVSCode').cljfmtParameters;
+    cljfmtParams = cljfmtParams.isEmpty ? "nil" : "{"+cljfmtParams+"}";
+
+
     // Running "(require 'cljfmt.core)" in right after we have checked we are connected to nREPL
     // would be a better option but in this case "cljfmt.core/reformat-string" fails the first
     // time it is called. I have no idea what causes this behavior so I decided to put the require
     // statement right here - don't think it does any harm. If someone knows how to fix it
     // please send a pull request with a fix.
-    nreplClient.evaluate(`(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" nil)`)
+    nreplClient.evaluate(`(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`)
         .then(value => {
             if ('ex' in value[0]) {
                 vscode.window.showErrorMessage(value[1].err);

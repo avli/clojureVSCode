@@ -2,7 +2,7 @@
     "name": "clojure",
     "displayName": "Clojure",
     "description": "Clojure nREPL support for Visual Studio Code",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "publisher": "avli",
     "author": {
         "name": "Andrey Lisin",
@@ -47,6 +47,9 @@
     "engines": {
         "vscode": "^1.14.0"
     },
+    "recommendations": [
+        "tonsky.clojure-warrior"
+    ],
     "categories": [
         "Languages",
         "Other"

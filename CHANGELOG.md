@@ -1,3 +1,7 @@
+# Version 0.9.4
+
+Adds the `:headless` option to the embedded nREPL and [clojure-warrior](https://marketplace.visualstudio.com/items?itemName=tonsky.clojure-warrior) to the extension recommendations.
+
 # Version 0.9.3
 
 Adds support of `cljfmt` options.

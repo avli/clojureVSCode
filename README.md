@@ -4,7 +4,7 @@
 
 [Clojure](https://clojure.org) and [ClojureScript](https://clojurescript.org) support for Visual Studio Code.
 
-If you are a ClojureScript user, please read [this section](https://github.com/avli/clojureVSCode#clojurescript-project-setup) carefully.
+If you are a ClojureScript user, please read [this section](#clojurescript-project-setup) carefully.
 
 I'm trying, believe me!
 

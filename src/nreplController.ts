@@ -28,6 +28,7 @@ const LEIN_ARGS: string[] = [
     '[cider/cider-nrepl "0.15.1"]',
     '--',
     'repl',
+    ':headless'
 ];
 
 const R_NREPL_CONNECTION_INFO = /nrepl:\/\/(.*?:.*?(?=[\n\r]))/;

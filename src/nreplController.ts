@@ -37,6 +37,10 @@ let nreplProcess: ChildProcess;
 
 const isStarted = () => !!nreplProcess;
 
+// Create a channel in the Output window so that the user
+// can view output from the nREPL session.
+const nreplChannel = vscode.window.createOutputChannel('nREPL');
+
 const start = (): Promise<CljConnectionInformation> => {
     if (isStarted())
         return Promise.reject({ nreplError: 'nREPL already started.' });
@@ -46,9 +50,18 @@ const start = (): Promise<CljConnectionInformation> => {
         detached: !(os.platform() === 'win32')
     });
 
+    // Clear any output from previous nREPL sessions to help users focus
+    // on the current session only.
+    nreplChannel.clear();
+
     return new Promise((resolve, reject) => {
         nreplProcess.stdout.addListener('data', data => {
             const nreplConnectionMatch = data.toString().match(R_NREPL_CONNECTION_INFO);
+
+            // Send any stdout messages to the channel, but do not bring the
+            // channel to the front, since these messages are likely just
+            // informative.
+            nreplChannel.append(data.toString());
 
             if (nreplConnectionMatch && nreplConnectionMatch[1]) {
                 const [host, port] = nreplConnectionMatch[1].split(':');
@@ -57,19 +70,17 @@ const start = (): Promise<CljConnectionInformation> => {
         });
 
         nreplProcess.stderr.on('data', data => {
-            console.info('nrepl stderr =>', data.toString());
+            // Log errors and bring panel to the front.
+            nreplChannel.append(data.toString());
+            nreplChannel.show();
         });
 
-        nreplProcess.on('exit', (code, signal) => {
-            console.info(`nREPL exit => ${code} / Signal: ${signal}`);
-            stop();
-            return reject();
-        });
-
-        nreplProcess.on('close', (code, signal) => {
-            console.info(`nREPL close => ${code} / Signal: ${signal}`);
-            stop();
-            return reject();
+        nreplProcess.on('exit', (code) => {
+            // nREPL process has exited before we were able to read a host / port.
+            const message = `nREPL exited with code ${code}`
+            nreplChannel.appendLine(message);
+            nreplChannel.show();
+            return reject({ nreplError: message});
         });
     });
 };
@@ -78,12 +89,22 @@ const stop = () => {
     if (nreplProcess) {
         // Workaround http://azimi.me/2014/12/31/kill-child_process-node-js.html
         nreplProcess.removeAllListeners();
-        if(os.platform() === 'win32'){
-            exec('taskkill /pid ' + nreplProcess.pid + ' /T /F')
+
+        try {
+            // Killing the process will throw an error `kill ESRCH` this method
+            // is invoked after the nREPL process has exited. This happens when
+            // we try to gracefully  clean up after spawning the nREPL fails.
+            // We wrap the killing code in `try/catch` to handle this.
+            if(os.platform() === 'win32'){
+                exec('taskkill /pid ' + nreplProcess.pid + ' /T /F')
+            }
+            else {
+                process.kill(-nreplProcess.pid);
+            }
+        } catch (exception) {
+            console.error("Error cleaning up nREPL process", exception);
         }
-        else {
-            process.kill(-nreplProcess.pid);
-        }
+
         nreplProcess = null;
     }
 };

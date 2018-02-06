@@ -136,12 +136,10 @@ const startNRepl = (): void => {
         .then(connectionInfo => nreplConnection = connectionInfo)
         .then(() => nreplClient.test(nreplConnection))
         .then(stopLoadingAnimation)
-        .then(() => saveConnection(nreplConnection))
-        .catch(({ nreplError }) => {
+        .then(() => saveConnection(nreplConnection), ({ nreplError }) => {
             stopLoadingAnimation();
             if (!nreplError)
                 nreplError = "Can't start nREPL.";
-
             disconnect(false);
             vscode.window.showErrorMessage(nreplError);
         });

@@ -93,6 +93,7 @@ Open an [issue](https://github.com/avli/clojureVSCode/issues) if you want to pro
 - [Fabian Achammer](https://github.com/fachammer)
 - [Nikita Prokopov](https://github.com/tonsky)
 - [Alessandro Decina](https://github.com/alessandrod)
+- [Marc O'Morain](https://github.com/marcomorain)
 
 ## License
 

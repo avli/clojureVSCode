@@ -1,3 +1,7 @@
+# Version 0.9.5
+
+Adds a channel for nREPL output to the Output Window.
+
 # Version 0.9.4
 
 Adds the `:headless` option to the embedded nREPL and [clojure-warrior](https://marketplace.visualstudio.com/items?itemName=tonsky.clojure-warrior) to the extension recommendations.

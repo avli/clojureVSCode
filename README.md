@@ -10,7 +10,7 @@ I'm trying, believe me!
 
 ## Quickstart
 
-Make sure that [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension will start nREPL and connect to it - now all the goodies should work :-)
+Make sure that [Leiningen](https://leiningen.org/) is installed on your machine, open a Clojure file or project, wait until the extension starts the nREPL (see status on the bottom of the VSCode window) and [connect to it](#connecting-to-the-repl) - now all the goodies should work :-)
 
 Doesn't work? Not exactly what you need? See the [Manual Configuration section](#manual-configuration)!
 
@@ -35,6 +35,16 @@ Doesn't work? Not exactly what you need? See the [Manual Configuration section](
 
 * Linting
 * [Debug](https://github.com/indiejames/vscode-clojure-debug)
+
+## Connecting to the REPL
+
+- Open a terminal (either the one embedded in VSCode or a separate one)
+- Change directory to the root directory of the Clojure project (where the REPL started by clojureVSCode will have updated the hidden file `.nrepl-port`)
+- with lein, do `lein repl :connect`.
+
+## Evaluating code in the REPL
+
+`Clojure: Eval` (in the command palette) will compile the current file in the editor and load it in the REPL.
 
 ## Manual Configuration
 

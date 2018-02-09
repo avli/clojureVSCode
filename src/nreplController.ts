@@ -57,10 +57,7 @@ const start = (): Promise<CljConnectionInformation> => {
     return new Promise((resolve, reject) => {
         nreplProcess.stdout.addListener('data', data => {
             const nreplConnectionMatch = data.toString().match(R_NREPL_CONNECTION_INFO);
-
-            // Send any stdout messages to the channel, but do not bring the
-            // channel to the front, since these messages are likely just
-            // informative.
+            // Send any stdout messages to the output channel
             nreplChannel.append(data.toString());
 
             if (nreplConnectionMatch && nreplConnectionMatch[1]) {
@@ -70,15 +67,16 @@ const start = (): Promise<CljConnectionInformation> => {
         });
 
         nreplProcess.stderr.on('data', data => {
-            // Log errors and bring panel to the front.
+            // Send any stderr messages to the output channel
             nreplChannel.append(data.toString());
-            nreplChannel.show();
         });
 
         nreplProcess.on('exit', (code) => {
             // nREPL process has exited before we were able to read a host / port.
             const message = `nREPL exited with code ${code}`
             nreplChannel.appendLine(message);
+            // Bring the output channel to the foreground so that the user can
+            // use the output to debug the problem.
             nreplChannel.show();
             return reject({ nreplError: message});
         });

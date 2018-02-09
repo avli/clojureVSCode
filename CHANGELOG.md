@@ -1,3 +1,7 @@
+# Version 0.9.6
+
+Adds the [Connecting to the REPL](https://github.com/avli/clojureVSCode#connecting-to-the-repl) section to README.md and Slightly changes the behavior of the nREPL output channel only bringing it to the foreground on error.
+
 # Version 0.9.5
 
 Adds a channel for nREPL output to the Output Window.

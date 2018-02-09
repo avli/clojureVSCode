@@ -1,6 +1,6 @@
 # clojureVSCode
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/avli.clojure.svg)](https://marketplace.visualstudio.com/items?itemName=avli.clojure)
+[![Version](https://vsmarketplacebadge.apphb.com/version/avli.clojure.svg)](https://marketplace.visualstudio.com/items?itemName=avli.clojure) [![Build Status](https://travis-ci.org/avli/clojureVSCode.svg?branch=master)](https://travis-ci.org/avli/clojureVSCode)
 
 [Clojure](https://clojure.org) and [ClojureScript](https://clojurescript.org) support for Visual Studio Code.
 

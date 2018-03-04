@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import * as net from 'net';
 import { Buffer } from 'buffer';
 
@@ -105,6 +106,10 @@ const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | 
         client.on('error', error => {
             client.end();
             client.removeAllListeners();
+            if (error['code'] == 'ECONNREFUSED') {
+                vscode.window.showErrorMessage('Connection refused.');
+                cljConnection.disconnect();
+            }
             reject(error);
         });
 

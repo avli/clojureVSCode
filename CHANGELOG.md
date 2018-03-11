@@ -1,3 +1,7 @@
+# Version 0.9.8
+
+Temporary removes `refactor-nrepl` from the dependencies of the embedded nREPL at least untile [this issue](https://github.com/clojure-emacs/refactor-nrepl/issues/206) won't be fixed.
+
 # Version 0.9.7
 
 Fixes the behavior of nREPL connection. If a remote nREPL is closed evaluation of code will show the message about it and the connection indicator will be removed.

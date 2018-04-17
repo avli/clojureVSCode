@@ -18,6 +18,11 @@ interface nREPLInfoMessage {
     session: string;
 }
 
+type TestMessage = {
+    op: "test" | "test-all" | "test-stacktrace" | "retest"
+    ns?: string
+}
+
 interface nREPLEvalMessage {
     op: string;
     file: string;
@@ -70,6 +75,15 @@ const evaluateFile = (code: string, filepath: string, session?: string): Promise
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
+const testNamespace = function(namespace: string): Promise<any[]> {
+    const message: TestMessage = {
+        op: "test",
+        ns: namespace
+    }
+    return send(message);
+
+}
+
 const clone = (session?: string): Promise<any[]> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
@@ -92,7 +106,9 @@ const listSessions = (): Promise<[string]> => {
     });
 }
 
-const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
+type Message = TestMessage | nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage;
+
+const send = (msg: Message, connection?: CljConnectionInformation): Promise<any[]> => {
     return new Promise<any[]>((resolve, reject) => {
         connection = connection || cljConnection.getConnection();
 
@@ -148,6 +164,7 @@ export const nreplClient = {
     stacktrace,
     clone,
     test,
+    testNamespace,
     close,
     listSessions
 };

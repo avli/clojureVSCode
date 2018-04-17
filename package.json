@@ -73,6 +73,10 @@
                 "title": "Clojure: Eval and show the result"
             },
             {
+                "command": "clojureVSCode.testNamespace",
+                "title": "Clojure: Test the current namespace."
+            },
+            {
                 "command": "clojureVSCode.manuallyConnectToNRepl",
                 "title": "Clojure: Connect to a running nREPL"
             },

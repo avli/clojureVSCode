@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
-import { nreplClient } from './nreplClient';
+import { nreplClient, TestListener } from './nreplClient';
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {
     evaluate(outputChannel, false);
@@ -23,6 +23,7 @@ type TestResults = {
     }
     'testing-ns': string
     'gen-input': any[]
+    status?: string[]
     results: {
         [key: string]: { // Namespace
             [key: string]: {
@@ -38,7 +39,7 @@ type TestResults = {
     session: string
 }
 
-export function testNamespace(outputChannel: vscode.OutputChannel): void {
+export function testNamespace(outputChannel: vscode.OutputChannel, listener: TestListener): void {
     if (!cljConnection.isConnected()) {
         vscode.window.showWarningMessage('You must be connected to an nREPL session to test a namespace.');
         return;
@@ -49,26 +50,42 @@ export function testNamespace(outputChannel: vscode.OutputChannel): void {
 
     outputChannel.appendLine("Testing " + ns)
 
-    const response = nreplClient.testNamespace(ns);
+    const promise: Promise<TestResults[]> = nreplClient.testNamespace(ns);
 
-    response.then((responses) => {
+    promise.then((responses) => {
+
+        console.log("Test result promise delivery");
+        console.log(responses);
 
         responses.forEach(response => {
 
+            if (response.status && response.status.indexOf("unknown-op") != -1) {
+                outputChannel.appendLine("Failed to run tests: the cider.nrepl.middleware.test middleware in not loaded.");
+                return;
+            }
+
+            for (const ns in response.results) {
+
+                const namespace = response.results[ns];
+
+                for (const varName in namespace) {
+
+                    namespace[varName].forEach(r => {
+                        listener.onTestResult(ns, varName, r.type == 'pass');
+                    });
+                }
+            }
+
             if ('summary' in response) {
 
-                const results: TestResults = response;
-
-                console.log(results.results);
-
                 outputChannel.appendLine("Test Summary")
-                outputChannel.appendLine("Namespace: " + results["testing-ns"])
-                outputChannel.appendLine("Error: " + results.summary.error);
-                outputChannel.appendLine("Fail: " + results.summary.fail);
-                outputChannel.appendLine("NS: " + results.summary.ns);
-                outputChannel.appendLine("Pass: " + results.summary.pass);
-                outputChannel.appendLine("Test: " + results.summary.test);
-                outputChannel.appendLine("Var: " + results.summary.var);
+                outputChannel.appendLine("Namespace: " + response["testing-ns"])
+                outputChannel.appendLine("Error: " + response.summary.error);
+                outputChannel.appendLine("Fail: " + response.summary.fail);
+                outputChannel.appendLine("NS: " + response.summary.ns);
+                outputChannel.appendLine("Pass: " + response.summary.pass);
+                outputChannel.appendLine("Test: " + response.summary.test);
+                outputChannel.appendLine("Var: " + response.summary.var);
             }
         });
 

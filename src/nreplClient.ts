@@ -5,6 +5,103 @@ import { Buffer } from 'buffer';
 import * as bencodeUtil from './bencodeUtil';
 import { cljConnection, CljConnectionInformation } from './cljConnection';
 
+type Results = {
+    [key: string]: { // namespace
+        [key: string]: boolean // var => bool
+    }
+}
+
+type NamespaceNode = {
+    type: 'ns'
+    ns: string
+}
+
+type VarNode = {
+    type: 'var'
+    var: string
+}
+
+type RootNode = {
+    type: 'root'
+}
+
+type TestNode = NamespaceNode | VarNode | RootNode
+
+export interface TestListener {
+    // TODO - make this a simple function
+    onTestResult(ns: string, varName: string, success: boolean): void;
+}
+
+const label = function (node: TestNode): string {
+    switch (node.type) {
+        case 'ns': return node.ns;
+        case 'var': return node.var;
+        case 'root': return 'Namespaces'
+    }
+}
+
+class ClojureTestDataProvider implements vscode.TreeDataProvider<TestNode>, TestListener {
+
+    // TODO - make this a simple function
+    onTestResult(ns: string, varName: string, success: boolean): void {
+
+        console.log(ns, varName, success);
+
+        this.results = {
+            ... this.results,
+            [ns]: {
+                ...this.results[ns],
+                [varName]: success
+            }
+        }
+
+        this.onDidChangeTreeData(null);
+    }
+
+    onDidChangeTreeData?: vscode.Event<TestNode>;
+
+    //private results : Results = Map<String, Map<String, boolean>>
+    private results: Map<string, Map<string, boolean>> = new Map();
+
+    private namespaces(): string[] {
+        const spaces : string[] = [];
+        for (const ns in this.results) {
+            spaces.push(ns)
+        }
+        return spaces;
+    }
+
+    getTreeItem(element: TestNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+
+        const result: vscode.TreeItem = {
+            label: label(element),
+            collapsibleState: vscode.TreeItemCollapsibleState.Collapsed
+        };
+
+        return result;
+    }
+
+    getChildren(element?: TestNode): vscode.ProviderResult<TestNode[]> {
+
+        if (!element)
+            return [{ type: 'root' }]
+
+        switch (element.type) {
+            case 'root': {
+                return this.namespaces().map((ns) => {
+                    const node: NamespaceNode = { type: 'ns', ns: ns };
+                    return node;
+                });
+            }
+        }
+        return null;
+    }
+}
+
+export const buildTestProvider = function (): ClojureTestDataProvider {
+    return new ClojureTestDataProvider();
+};
+
 interface nREPLCompleteMessage {
     op: string;
     symbol: string;
@@ -75,7 +172,7 @@ const evaluateFile = (code: string, filepath: string, session?: string): Promise
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-const testNamespace = function(namespace: string): Promise<any[]> {
+const testNamespace = function (namespace: string): Promise<any[]> {
     const message: TestMessage = {
         op: "test",
         ns: namespace
@@ -98,7 +195,7 @@ const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
 const close = (session?: string): Promise<any[]> => send({ op: 'close', session: session });
 
 const listSessions = (): Promise<[string]> => {
-    return send({op: 'ls-sessions'}).then(respObjs => {
+    return send({ op: 'ls-sessions' }).then(respObjs => {
         const response = respObjs[0];
         if (response.status[0] == "done") {
             return Promise.resolve(response.sessions);

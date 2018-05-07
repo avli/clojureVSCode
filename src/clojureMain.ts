@@ -12,6 +12,8 @@ import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
 
+import {buildTestProvider } from './nreplClient'
+
 export function activate(context: vscode.ExtensionContext) {
     cljConnection.setCljContext(context);
     context.subscriptions.push(nreplController);
@@ -23,6 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     maybeActivateFormatOnSave();
 
+    const testResultDataProvidier = buildTestProvider();
+
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
     vscode.commands.registerCommand('clojureVSCode.stopDisconnectNRepl', cljConnection.disconnect);
     vscode.commands.registerCommand('clojureVSCode.startNRepl', cljConnection.startNRepl);
@@ -30,7 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
     const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.eval', () => clojureEval(evaluationResultChannel));
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
-    vscode.commands.registerCommand('clojureVSCode.testNamespace', () => testNamespace(evaluationResultChannel));
+
+
+    vscode.commands.registerCommand('clojureVSCode.testNamespace', () => testNamespace(evaluationResultChannel, testResultDataProvidier));
+    vscode.window.registerTreeDataProvider('clojure', testResultDataProvidier);
 
     vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
 

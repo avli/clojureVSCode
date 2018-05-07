@@ -55,7 +55,7 @@
         "tonsky.clojure-warrior"
     ],
     "categories": [
-        "Languages",
+        "Programming Languages",
         "Other"
     ],
     "activationEvents": [
@@ -93,6 +93,14 @@
                 "title": "Clojure: Format file or selection"
             }
         ],
+        "views": {
+            "test": [
+                {
+                    "id": "clojure",
+                    "name": "Clojure"
+                }
+            ]
+        },
         "configuration": {
             "type": "object",
             "title": "Clojure extension configuration",

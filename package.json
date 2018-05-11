@@ -77,6 +77,10 @@
                 "title": "Clojure: Test the current namespace."
             },
             {
+                "command": "clojureVSCode.runAllTests",
+                "title": "Clojure: Run All Tests."
+            },
+            {
                 "command": "clojureVSCode.manuallyConnectToNRepl",
                 "title": "Clojure: Connect to a running nREPL"
             },

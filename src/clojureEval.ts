@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 
 import { cljConnection } from './cljConnection';
 import { cljParser } from './cljParser';
-import { nreplClient, TestListener } from './nreplClient';
+import { nreplClient } from './nreplClient';
+import { TestListener } from './testRunner';
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {
     evaluate(outputChannel, false);
@@ -27,37 +28,38 @@ type TestResults = {
     results: {
         [key: string]: { // Namespace
             [key: string]: {
-                context: any[]
+                context: any
+                file?: string
                 index: number
-                message: string[]
+                line?: number
+                message?: string
                 ns: string
                 type: string
                 var: string
+                actual?: string
+                expected?: string
             }[];
         }
     }
     session: string
 }
 
-export function testNamespace(outputChannel: vscode.OutputChannel, listener: TestListener): void {
+function runTests(outputChannel: vscode.OutputChannel, listener: TestListener, namespace?: string): void {
     if (!cljConnection.isConnected()) {
         vscode.window.showWarningMessage('You must be connected to an nREPL session to test a namespace.');
         return;
     }
 
-    const editor = vscode.window.activeTextEditor;
-    const ns = cljParser.getNamespace(editor.document.getText()); // log ns and 'starting'
-
-    outputChannel.appendLine("Testing " + ns)
-
-    const promise: Promise<TestResults[]> = nreplClient.testNamespace(ns);
+    const promise: Promise<TestResults[]> = nreplClient.runTests(namespace);
 
     promise.then((responses) => {
 
         console.log("Test result promise delivery");
-        console.log(responses);
 
         responses.forEach(response => {
+
+            console.log(response);
+            console.log(response.results);
 
             if (response.status && response.status.indexOf("unknown-op") != -1) {
                 outputChannel.appendLine("Failed to run tests: the cider.nrepl.middleware.test middleware in not loaded.");
@@ -68,24 +70,42 @@ export function testNamespace(outputChannel: vscode.OutputChannel, listener: Tes
 
                 const namespace = response.results[ns];
 
+                outputChannel.appendLine("Results for " + ns)
+
                 for (const varName in namespace) {
 
+                    // Each var being tested reports a list of statuses, one for each
+                    // `is` assertion in the test. Here we just want to reduce this
+                    // down to a single pass/fail.
+                    const statuses = new Set(namespace[varName].map(r => r.type));
+                    const passed = (statuses.size == 0) ||
+                        ((statuses.size == 1) && statuses.has('pass'));
+                    listener.onTestResult(ns, varName, passed);
+
                     namespace[varName].forEach(r => {
-                        listener.onTestResult(ns, varName, r.type == 'pass');
+                        if (r.type != 'pass') {
+                            outputChannel.appendLine(r.type + " in (" + r.var + ") (" + r.file + ":" + r.line + ")");
+                            if (typeof r.message === 'string') {
+                                outputChannel.appendLine(r.message);
+                            }
+                            if (r.expected) {
+                                outputChannel.append("expected: " + r.expected)
+                            }
+                            if (r.actual) {
+                                outputChannel.append("  actual: " + r.actual)
+                            }
+                        }
                     });
                 }
             }
 
             if ('summary' in response) {
-
-                outputChannel.appendLine("Test Summary")
-                outputChannel.appendLine("Namespace: " + response["testing-ns"])
-                outputChannel.appendLine("Error: " + response.summary.error);
-                outputChannel.appendLine("Fail: " + response.summary.fail);
-                outputChannel.appendLine("NS: " + response.summary.ns);
-                outputChannel.appendLine("Pass: " + response.summary.pass);
-                outputChannel.appendLine("Test: " + response.summary.test);
-                outputChannel.appendLine("Var: " + response.summary.var);
+                const failed = response.summary.fail + response.summary.error;
+                if (failed > 0) {
+                    vscode.window.showErrorMessage(failed + " tests failed.")
+                } else {
+                    vscode.window.showInformationMessage(response.summary.var + " tests passed")
+                }
             }
         });
 
@@ -94,6 +114,18 @@ export function testNamespace(outputChannel: vscode.OutputChannel, listener: Tes
         outputChannel.append("Tests failed: ");
         outputChannel.appendLine(message);
     });
+}
+
+export function testNamespace(outputChannel: vscode.OutputChannel, listener: TestListener): void {
+    const editor = vscode.window.activeTextEditor;
+    const ns = cljParser.getNamespace(editor.document.getText()); // log ns and 'starting'
+    outputChannel.appendLine("Testing " + ns)
+    runTests(outputChannel, listener, ns);
+}
+
+export function runAllTests(outputChannel: vscode.OutputChannel, listener: TestListener): void {
+    outputChannel.appendLine("Testing all namespaces");
+    runTests(outputChannel, listener);
 }
 
 function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {

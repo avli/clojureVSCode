@@ -12,13 +12,13 @@ function slashEscape(contents: string) {
 }
 
 function slashUnescape(contents: string) {
-    const replacements = { '\\\\': '\\', '\\n': '\n', '\\"': '"' };
-    return contents.replace(/\\(\\|n|")/g, function (match) {
-        return replacements[match];
+    const replacements : { [key: string]: string} = { '\\\\': '\\', '\\n': '\n', '\\"': '"' };
+    return contents.replace(/\\(\\|n|")/g, function(match) {
+        return replacements[match]
     });
 }
 
-export const formatFile = (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit): void => {
+export const formatFile = (textEditor: vscode.TextEditor, edit?: vscode.TextEditorEdit): void => {
 
     if (!cljConnection.isConnected()) {
         vscode.window.showErrorMessage("Formatting functions don't work, connect to nREPL first.");
@@ -70,11 +70,14 @@ export const maybeActivateFormatOnSave = () => {
             return;
         }
         let textEditor = vscode.window.activeTextEditor;
+        if (!textEditor) {
+            return
+        }
         let editorConfig = vscode.workspace.getConfiguration('editor');
         const globalEditorFormatOnSave = editorConfig && editorConfig.has('formatOnSave') && editorConfig.get('formatOnSave') === true;
         let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
         if ((clojureConfig.formatOnSave || globalEditorFormatOnSave) && textEditor.document === document) {
-            formatFile(textEditor, null);
+            formatFile(textEditor, undefined);
         }
     });
 }

@@ -15,7 +15,7 @@ interface nREPLInfoMessage {
     op: string;
     symbol: string;
     ns: string;
-    session: string;
+    session?: string;
 }
 
 interface nREPLEvalMessage {
@@ -56,21 +56,21 @@ const info = (symbol: string, ns: string, session?: string): Promise<any> => {
     return send(msg).then(respObjs => respObjs[0]);
 };
 
-const evaluate = (code: string, session?: string): Promise<any[]> => clone(session).then((new_session) => {
-    const session_id = new_session['new-session'];
+const evaluate = (code: string, session?: string): Promise<any[]> => clone(session).then((session_id) => {
     const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
     return send(msg);
 });
 
-const evaluateFile = (code: string, filepath: string, session?: string): Promise<any[]> => clone(session).then((new_session) => {
-    const session_id = new_session['new-session'];
+const evaluateFile = (code: string, filepath: string, session?: string): Promise<any[]> => clone(session).then((session_id) => {
     const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
     return send(msg);
 });
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-const clone = (session?: string): Promise<any[]> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
+const clone = (session?: string): Promise<string> => {
+    return send({ op: 'clone', session: session }).then(respObjs => respObjs[0]['new-session']);
+}
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
     return send({ op: 'clone' }, connectionInfo)
@@ -78,6 +78,9 @@ const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
         .then(response => {
             if (!('new-session' in response))
                 return Promise.reject(false);
+            else {
+                return Promise.resolve([]);
+            }
         });
 };
 
@@ -100,13 +103,13 @@ const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | 
             return reject('No connection found.');
 
         const client = net.createConnection(connection.port, connection.host);
-        Object.keys(msg).forEach(key => msg[key] === undefined && delete msg[key]);
+        Object.keys(msg).forEach(key => (msg as any)[key] === undefined && delete (msg as any)[key]);
         client.write(bencodeUtil.encode(msg), 'binary');
 
         client.on('error', error => {
             client.end();
             client.removeAllListeners();
-            if (error['code'] == 'ECONNREFUSED') {
+            if ((error as any)['code'] === 'ECONNREFUSED') {
                 vscode.window.showErrorMessage('Connection refused.');
                 cljConnection.disconnect();
             }
@@ -114,7 +117,7 @@ const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | 
         });
 
         let nreplResp = Buffer.from('');
-        const respObjects = [];
+        const respObjects: any[] = [];
         client.on('data', data => {
             nreplResp = Buffer.concat([nreplResp, data]);
             const { decodedObjects, rest } = bencodeUtil.decodeObjects(nreplResp);

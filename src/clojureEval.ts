@@ -19,6 +19,8 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     }
 
     const editor = vscode.window.activeTextEditor;
+
+    if (!editor) return;
     const selection = editor.selection;
     let text = editor.document.getText();
     if (!selection.isEmpty) {
@@ -65,7 +67,7 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
             outputChannel.appendLine(`${stacktraceObj.class} ${stacktraceObj.message}`);
             outputChannel.appendLine(` at ${stacktraceObj.file}:${errLine}:${errChar}`);
 
-            stacktraceObj.stacktrace.forEach(trace => {
+            stacktraceObj.stacktrace.forEach((trace: any) => {
                 if (trace.flags.indexOf('tooling') > -1)
                     outputChannel.appendLine(`    ${trace.class}.${trace.method} (${trace.file}:${trace.line})`);
             });

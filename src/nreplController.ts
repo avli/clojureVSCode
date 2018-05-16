@@ -1,7 +1,7 @@
 import 'process';
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { spawn } from 'cross-spawn';
+import * as spawn from 'cross-spawn';
 import { ChildProcess, exec } from 'child_process';
 
 import { CljConnectionInformation } from './cljConnection';
@@ -28,7 +28,7 @@ const LEIN_ARGS: string[] = [
 
 const R_NREPL_CONNECTION_INFO = /nrepl:\/\/(.*?:.*?(?=[\n\r]))/;
 
-let nreplProcess: ChildProcess;
+let nreplProcess: ChildProcess | null
 
 const isStarted = () => !!nreplProcess;
 
@@ -40,16 +40,17 @@ const start = (): Promise<CljConnectionInformation> => {
     if (isStarted())
         return Promise.reject({ nreplError: 'nREPL already started.' });
 
-    nreplProcess = spawn('lein', LEIN_ARGS, {
-        cwd: vscode.workspace.rootPath,
-        detached: !(os.platform() === 'win32')
-    });
-
     // Clear any output from previous nREPL sessions to help users focus
     // on the current session only.
     nreplChannel.clear();
 
     return new Promise((resolve, reject) => {
+
+        nreplProcess = spawn('lein', LEIN_ARGS, {
+            cwd: vscode.workspace.rootPath,
+            detached: !(os.platform() === 'win32')
+        });
+
         nreplProcess.stdout.addListener('data', data => {
             const nreplConnectionMatch = data.toString().match(R_NREPL_CONNECTION_INFO);
             // Send any stdout messages to the output channel

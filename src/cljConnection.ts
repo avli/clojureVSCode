@@ -11,7 +11,7 @@ export interface CljConnectionInformation {
 }
 export interface REPLSession {
     type: 'ClojureScript' | 'Clojure';
-    id: string;
+    id?: string;
 }
 
 const CONNECTION_STATE_KEY: string = 'CLJ_CONNECTION';
@@ -23,7 +23,7 @@ let cljContext: vscode.ExtensionContext;
 
 const setCljContext = (context: vscode.ExtensionContext) => cljContext = context;
 
-const getConnection = (): CljConnectionInformation => cljContext.workspaceState.get(CONNECTION_STATE_KEY);
+const getConnection = (): CljConnectionInformation | undefined => cljContext.workspaceState.get(CONNECTION_STATE_KEY);
 
 const isConnected = (): boolean => !!getConnection();
 
@@ -47,7 +47,7 @@ const saveDisconnection = (showMessage: boolean = true): void => {
         vscode.window.showInformationMessage('Disconnected from nREPL.');
 };
 
-let loadingHandler: NodeJS.Timer;
+let loadingHandler: NodeJS.Timer | null
 const startLoadingAnimation = () => {
     if (loadingHandler)
         return;
@@ -173,7 +173,11 @@ const findClojureScriptSession = (sessions: string[]): Promise<string> => {
     if (sessions.length == 0)
         return Promise.reject(null);
 
-    let base_session = sessions.shift();
+    const base_session = sessions.shift();
+
+    if (!base_session) {
+        return Promise.reject("no base session");
+    }
     return nreplClient.evaluate('(js/parseInt "42")', base_session).then(results => {
         let { session, value } = results[0];
         nreplClient.close(session);

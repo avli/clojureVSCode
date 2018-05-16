@@ -18,7 +18,7 @@ const SPECIAL_FORM_CUSTOM_ARGLISTS: Map<string, string> = new Map<string, string
 
 export class ClojureSignatureProvider implements vscode.SignatureHelpProvider {
 
-    provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.SignatureHelp> {
+    provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.SignatureHelp> {
         if (!cljConnection.isConnected())
             return Promise.reject('No nREPL connected.');
 
@@ -55,7 +55,7 @@ function getSpecialFormSignatureHelp(info: any, parameterPosition: number): vsco
     return getSignatureHelp(signatureLabel, info.doc, arglists, parameterPosition);
 }
 
-function getFunctionSignatureHelp(info: any, parameterPosition: number): vscode.SignatureHelp {
+function getFunctionSignatureHelp(info: any, parameterPosition: number): vscode.SignatureHelp | undefined {
     const arglists = info['arglists-str'];
     if (!arglists)
         return;

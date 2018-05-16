@@ -20,9 +20,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.autoStartNRepl) {
         cljConnection.startNRepl();
     }
-    
+
     maybeActivateFormatOnSave();
-    
+
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
     vscode.commands.registerCommand('clojureVSCode.stopDisconnectNRepl', cljConnection.disconnect);
     vscode.commands.registerCommand('clojureVSCode.startNRepl', cljConnection.startNRepl);
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(CLOJURE_MODE, new ClojureSignatureProvider(), ' ', '\n'));
 
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
-    vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, new ClojureLanguageConfiguration());
+    vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, ClojureLanguageConfiguration);
 }
 
 export function deactivate() { }

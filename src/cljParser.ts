@@ -22,7 +22,7 @@ const CLJ_EXPRESSION_DELIMITERS: Map<string, string> = new Map<string, string>([
     [CLJ_TEXT_DELIMITER, CLJ_TEXT_DELIMITER],
 ]);
 
-const getExpressionInfo = (text: string): ExpressionInfo => {
+const getExpressionInfo = (text: string): ExpressionInfo | undefined  => {
     text = removeCljComments(text);
     const relativeExpressionInfo = getRelativeExpressionInfo(text);
     if (!relativeExpressionInfo)
@@ -42,7 +42,7 @@ const getExpressionInfo = (text: string): ExpressionInfo => {
 };
 
 const removeCljComments = (text: string): string => {
-    const lines = text.match(/[^\r\n]+/g); // split string by line
+    const lines = text.match(/[^\r\n]+/g) || [] // split string by line
 
     if (lines.length > 1) {
         return lines.map(line => removeCljComments(line)).join(`\n`); // remove comments from each line and concat them again after
@@ -65,7 +65,7 @@ const removeCljComments = (text: string): string => {
     return line.substring(0, uncommentedIndex);
 };
 
-const getRelativeExpressionInfo = (text: string, openChar: string = `(`): RelativeExpressionInfo => {
+const getRelativeExpressionInfo = (text: string, openChar: string = `(`): RelativeExpressionInfo | undefined => {
     const relativeExpressionInfo: RelativeExpressionInfo = {
         startPosition: text.length - 1,
         parameterPosition: -1,

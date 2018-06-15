@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { CLOJURE_MODE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
-import { clojureEval, clojureEvalAndShowResult } from './clojureEval';
+import { clojureEval, clojureEvalAndShowResult, testNamespace, runAllTests } from './clojureEval';
 import { ClojureDefinitionProvider } from './clojureDefinition';
 import { ClojureLanguageConfiguration } from './clojureConfiguration';
 import { ClojureHoverProvider } from './clojureHover';
@@ -11,6 +11,8 @@ import { JarContentProvider } from './jarContentProvider';
 import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
 import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
+
+import { buildTestProvider } from './testRunner'
 
 export function activate(context: vscode.ExtensionContext) {
     cljConnection.setCljContext(context);
@@ -23,6 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     maybeActivateFormatOnSave();
 
+    const testResultDataProvidier = buildTestProvider();
+
     vscode.commands.registerCommand('clojureVSCode.manuallyConnectToNRepl', cljConnection.manuallyConnect);
     vscode.commands.registerCommand('clojureVSCode.stopDisconnectNRepl', cljConnection.disconnect);
     vscode.commands.registerCommand('clojureVSCode.startNRepl', cljConnection.startNRepl);
@@ -30,6 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
     const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.eval', () => clojureEval(evaluationResultChannel));
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
+
+    vscode.commands.registerCommand('clojureVSCode.testNamespace', () => testNamespace(evaluationResultChannel, testResultDataProvidier));
+    vscode.commands.registerCommand('clojureVSCode.runAllTests', () => runAllTests(evaluationResultChannel, testResultDataProvidier));
+    vscode.window.registerTreeDataProvider('clojure', testResultDataProvidier);
 
     vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
 

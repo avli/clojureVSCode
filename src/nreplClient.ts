@@ -18,6 +18,12 @@ interface nREPLInfoMessage {
     session?: string;
 }
 
+type TestMessage = {
+    op: "test" | "test-all" | "test-stacktrace" | "retest"
+    ns?: string,
+    'load?'?: any
+}
+
 interface nREPLEvalMessage {
     op: string;
     file: string;
@@ -68,9 +74,17 @@ const evaluateFile = (code: string, filepath: string, session?: string): Promise
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-const clone = (session?: string): Promise<string> => {
-    return send({ op: 'clone', session: session }).then(respObjs => respObjs[0]['new-session']);
+const runTests = function (namespace: string): Promise<any[]> {
+    const message: TestMessage = {
+        op: (namespace ? "test" : "test-all"),
+        ns: namespace,
+        'load?': 1
+    }
+    return send(message);
 }
+
+
+const clone = (session?: string): Promise<any[]> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
     return send({ op: 'clone' }, connectionInfo)
@@ -87,7 +101,7 @@ const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
 const close = (session?: string): Promise<any[]> => send({ op: 'close', session: session });
 
 const listSessions = (): Promise<[string]> => {
-    return send({op: 'ls-sessions'}).then(respObjs => {
+    return send({ op: 'ls-sessions' }).then(respObjs => {
         const response = respObjs[0];
         if (response.status[0] == "done") {
             return Promise.resolve(response.sessions);
@@ -95,7 +109,12 @@ const listSessions = (): Promise<[string]> => {
     });
 }
 
-const send = (msg: nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage, connection?: CljConnectionInformation): Promise<any[]> => {
+type Message = TestMessage | nREPLCompleteMessage | nREPLInfoMessage | nREPLEvalMessage | nREPLStacktraceMessage | nREPLCloneMessage | nREPLCloseMessage | nREPLSingleEvalMessage;
+
+const send = (msg: Message, connection?: CljConnectionInformation): Promise<any[]> => {
+
+    console.log("nREPL: Sending op", msg);
+
     return new Promise<any[]>((resolve, reject) => {
         connection = connection || cljConnection.getConnection();
 
@@ -151,6 +170,7 @@ export const nreplClient = {
     stacktrace,
     clone,
     test,
+    runTests,
     close,
     listSessions
 };

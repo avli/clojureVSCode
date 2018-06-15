@@ -74,11 +74,11 @@
             },
             {
                 "command": "clojureVSCode.testNamespace",
-                "title": "Clojure: Test the current namespace."
+                "title": "Clojure: Test the current namespace"
             },
             {
                 "command": "clojureVSCode.runAllTests",
-                "title": "Clojure: Run All Tests."
+                "title": "Clojure: Run all tests"
             },
             {
                 "command": "clojureVSCode.manuallyConnectToNRepl",
@@ -90,7 +90,7 @@
             },
             {
                 "command": "clojureVSCode.stopDisconnectNRepl",
-                "title": "Clojure: Stop/disconnect nREPL"
+                "title": "Clojure: Disconnect from nREPL"
             },
             {
                 "command": "clojureVSCode.formatFile",

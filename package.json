@@ -134,18 +134,18 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "@types/jszip": "^0.0.31",
-        "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.85",
         "@types/cross-spawn": "^6.0.0",
-        "mocha": "^2.3.3",
-        "typescript": "^2.4.2",
-        "vscode": "^1.0.0"
+        "@types/jszip": "^0.0.31",
+        "@types/mocha": "^2.2.48",
+        "@types/node": "^6.0.113",
+        "mocha": "^5.2.0",
+        "typescript": "^2.9.2",
+        "vscode": "^1.1.18"
     },
     "dependencies": {
         "bencoder": "^0.0.5",
         "cross-spawn": "^5.1.0",
-        "jszip": "^3.1.1"
+        "jszip": "^3.1.5"
     },
     "repository": {
         "type": "git",

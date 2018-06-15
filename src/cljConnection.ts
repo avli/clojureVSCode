@@ -154,7 +154,7 @@ const disconnect = (showMessage: boolean = true): void => {
         vscode.window.showWarningMessage('Not connected to any nREPL.');
 };
 
-const getLocalNReplPort = (): number => {
+const getLocalNReplPort = (): number | undefined => {
     const projectDir = vscode.workspace.rootPath;
 
     if (projectDir) {
@@ -164,7 +164,9 @@ const getLocalNReplPort = (): number => {
     }
 
     const homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-    return getPortFromFS(path.join(homeDir, '.lein', 'repl-port'));
+    if (homeDir) {
+        return getPortFromFS(path.join(homeDir, '.lein', 'repl-port'));
+    }
 };
 
 const getPortFromFS = (path: string): number => fs.existsSync(path) ? Number.parseInt(fs.readFileSync(path, 'utf-8')) : NaN;

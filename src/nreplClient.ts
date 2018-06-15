@@ -74,7 +74,7 @@ const evaluateFile = (code: string, filepath: string, session?: string): Promise
 
 const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
 
-const runTests = function (namespace: string): Promise<any[]> {
+const runTests = function (namespace: string | undefined): Promise<any[]> {
     const message: TestMessage = {
         op: (namespace ? "test" : "test-all"),
         ns: namespace,
@@ -84,7 +84,7 @@ const runTests = function (namespace: string): Promise<any[]> {
 }
 
 
-const clone = (session?: string): Promise<any[]> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
+const clone = (session?: string): Promise<string> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
     return send({ op: 'clone' }, connectionInfo)

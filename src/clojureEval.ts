@@ -118,9 +118,16 @@ function runTests(outputChannel: vscode.OutputChannel, listener: TestListener, n
 
 export function testNamespace(outputChannel: vscode.OutputChannel, listener: TestListener): void {
     const editor = vscode.window.activeTextEditor;
-    const ns = cljParser.getNamespace(editor.document.getText()); // log ns and 'starting'
-    outputChannel.appendLine("Testing " + ns)
-    runTests(outputChannel, listener, ns);
+    if (editor) {
+        const text = editor.document.getText();
+        const ns = cljParser.getNamespace(text); // log ns and 'starting'
+        outputChannel.appendLine("Testing " + ns)
+        runTests(outputChannel, listener, ns);
+    } else {
+        // if having troubles with finding the namespace (though I'm not sure
+        // if it can actually happen), run all tests
+        runAllTests(outputChannel, listener);
+    }
 }
 
 export function runAllTests(outputChannel: vscode.OutputChannel, listener: TestListener): void {

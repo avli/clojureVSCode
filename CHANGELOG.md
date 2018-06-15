@@ -1,3 +1,9 @@
+# Version 0.10.0
+
+Adds integration with Clojure unit test framework.
+
+![Test results UI demo](https://user-images.githubusercontent.com/448001/39921203-ee8e30b6-5511-11e8-843a-690dd8624b87.gif)
+
 # Version 0.9.8
 
 Temporary removes `refactor-nrepl` from the dependencies of the embedded nREPL at least untile [this issue](https://github.com/clojure-emacs/refactor-nrepl/issues/206) won't be fixed.

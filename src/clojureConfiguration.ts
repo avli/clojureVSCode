@@ -63,10 +63,10 @@ const keywords = [
     'thread',
 ]
 
-export class ClojureLanguageConfiguration implements vscode.LanguageConfiguration {
-    wordPattern = /[\w\-\.:<>\*][\w\d\.\\/\-\?<>\*!]+/;
-    indentationRules = {
-        decreaseIndentPattern: undefined,
+export const ClojureLanguageConfiguration : vscode.LanguageConfiguration = {
+    wordPattern: /[\w\-\.:<>\*][\w\d\.\\/\-\?<>\*!]+/,
+    indentationRules: {
+        decreaseIndentPattern: /$^/, // line end then start - this will never match anything
         increaseIndentPattern: /^\s*\(.*[^)]\s*$/
     }
 }

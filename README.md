@@ -28,6 +28,7 @@ Doesn't work? Not exactly what you need? See the [Manual Configuration section](
 * Showing documentation on hover
 * Code formatting ([cljfmt](https://github.com/weavejester/cljfmt))
 * Function signatures
+* Integration with the Clojure unit test framework
 
 ![Code completion example](https://github.com/avli/clojureVSCode/raw/master/images/function%20signature%20example.png)
 

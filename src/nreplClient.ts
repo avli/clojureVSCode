@@ -84,7 +84,7 @@ const runTests = function (namespace: string | undefined): Promise<any[]> {
 }
 
 
-const clone = (session?: string): Promise<string> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]);
+const clone = (session?: string): Promise<string> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]['new-session']);
 
 const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
     return send({ op: 'clone' }, connectionInfo)

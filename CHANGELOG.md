@@ -1,3 +1,7 @@
+# Version 0.10.1
+
+Fixes the issue with the "Eval" command.
+
 # Version 0.10.0
 
 Adds integration with Clojure unit test framework.

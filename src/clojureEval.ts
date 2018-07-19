@@ -163,8 +163,14 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
             response = nreplClient.evaluateFile(text, editor.document.fileName, session.id);
         }
         response.then(respObjs => {
-            if (!!respObjs[0].ex)
-                return handleError(outputChannel, selection, showResults, respObjs[0].session);
+            if (!!respObjs[0].ex) {
+                vscode.window.showErrorMessage("Compilation Error")
+                for (let error of respObjs.map((r) => r.err).filter((e) => e)) {
+                    outputChannel.append(error);
+                }
+                return
+            }
+
 
             return handleSuccess(outputChannel, showResults, respObjs);
         })
@@ -178,6 +184,11 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
     return nreplClient.stacktrace(session)
         .then(stacktraceObjs => {
             const stacktraceObj = stacktraceObjs[0];
+
+            if (stacktraceObj.status && stacktraceObj.status.indexOf("unknown-op") != -1) {
+                outputChannel.appendLine("Failed to run get a stacktrace: the cider.nrepl.middleware.stacktrace middleware in not loaded.");
+                return;
+            }
 
             let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
             let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;

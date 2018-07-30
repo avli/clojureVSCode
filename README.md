@@ -65,7 +65,7 @@ option in your VSCode settings globally or per-project and connect manually to w
                       [cljfmt "0.5.7"]]}}
 ```
 
-Alternetively, you can put the code above to your project `project.clj` file.
+Alternatively, you can put the code above to your project `project.clj` file.
 
 ## Contributed Configuration
 

@@ -195,7 +195,7 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
                     outputChannel.appendLine(`    ${trace.class}.${trace.method} (${trace.file}:${trace.line})`);
             });
 
-            outputChannel.show();
+            outputChannel.show(true);
             nreplClient.close(session);
         });
 }
@@ -211,7 +211,7 @@ function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean
                 outputChannel.append(respObj.err);
             if (respObj.value)
                 outputChannel.appendLine(`=> ${respObj.value}`);
-            outputChannel.show();
+            outputChannel.show(true);
         });
     }
     nreplClient.close(respObjs[0].session);

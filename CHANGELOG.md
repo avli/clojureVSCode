@@ -1,3 +1,7 @@
+# Version 0.10.2
+
+Output window now preserves focus.
+
 # Version 0.10.1
 
 Fixes the issue with the "Eval" command.

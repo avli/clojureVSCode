@@ -10,7 +10,7 @@ const LEIN_ARGS: string[] = [
     'update-in',
     ':dependencies',
     'conj',
-    '[org.clojure/tools.nrepl "0.2.12" :exclusions [org.clojure/clojure]]',
+    '[org.clojure/tools.nrepl "0.2.13" :exclusions [org.clojure/clojure]]',
     '--',
     'update-in',
     ':dependencies',
@@ -20,7 +20,7 @@ const LEIN_ARGS: string[] = [
     'update-in',
     ':plugins',
     'conj',
-    '[cider/cider-nrepl "0.15.1"]',
+    '[cider/cider-nrepl "0.20.0"]',
     '--',
     'repl',
     ':headless'

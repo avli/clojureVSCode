@@ -1,3 +1,7 @@
+# Version 0.10.3
+
+Updates the embedded nREPL cider-nrepl version.
+
 # Version 0.10.2
 
 Output window now preserves focus.

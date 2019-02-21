@@ -147,13 +147,14 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     const selection = editor.selection;
     let text = editor.document.getText();
     if (!selection.isEmpty) {
-        const ns: string = cljParser.getNamespace(text);
-        text = `(ns ${ns})\n${editor.document.getText(selection)}`;
+        // const ns: string = cljParser.getNamespace(text);
+        // text = `(ns ${ns})\n${editor.document.getText(selection)}`;
+        text = editor.document.getText(selection);
     }
 
     cljConnection.sessionForFilename(editor.document.fileName).then(session => {
         let response;
-        if (!selection.isEmpty && session.type == 'ClojureScript') {
+        if (!selection.isEmpty) {
             // Piggieback's evalFile() ignores the text sent as part of the request
             // and just loads the whole file content from disk. So we use eval()
             // here, which as a drawback will give us a random temporary filename in
@@ -204,6 +205,7 @@ function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean
     if (!showResults) {
         vscode.window.showInformationMessage('Successfully compiled');
     } else {
+        let connection = cljConnection.getConnection();
         respObjs.forEach(respObj => {
             if (respObj.out)
                 outputChannel.append(respObj.out);
@@ -212,7 +214,10 @@ function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean
             if (respObj.value)
                 outputChannel.appendLine(`=> ${respObj.value}`);
             outputChannel.show(true);
+
+            if(connection && !connection.session) {
+                connection.session = respObj.session;
+            }
         });
     }
-    nreplClient.close(respObjs[0].session);
 }

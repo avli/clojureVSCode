@@ -69,8 +69,16 @@
                 "title": "Clojure: Eval"
             },
             {
+                "command": "clojureVSCode.evalRegion",
+                "title": "Clojure: Eval Region"
+            },
+            {
                 "command": "clojureVSCode.evalAndShowResult",
                 "title": "Clojure: Eval and show the result"
+            },
+            {
+                "command": "clojureVSCode.evalRegionAndShowResult",
+                "title": "Clojure: Eval region and show the result"
             },
             {
                 "command": "clojureVSCode.testNamespace",

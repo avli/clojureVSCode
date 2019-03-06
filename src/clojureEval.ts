@@ -6,11 +6,19 @@ import { nreplClient } from './nreplClient';
 import { TestListener } from './testRunner';
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {
-    evaluate(outputChannel, false);
+    evaluate(outputChannel, false, false);
+}
+
+export function clojureEvalRegion(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, false, true);
 }
 
 export function clojureEvalAndShowResult(outputChannel: vscode.OutputChannel): void {
-    evaluate(outputChannel, true);
+    evaluate(outputChannel, true, false);
+}
+
+export function clojureEvalRegionAndShowResult(outputChannel: vscode.OutputChannel): void {
+    evaluate(outputChannel, true, true);
 }
 
 type TestResults = {
@@ -135,7 +143,7 @@ export function runAllTests(outputChannel: vscode.OutputChannel, listener: TestL
     runTests(outputChannel, listener);
 }
 
-function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
+function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean, selectRegion: boolean): void {
     if (!cljConnection.isConnected()) {
         vscode.window.showWarningMessage('You should connect to nREPL first to evaluate code.');
         return;
@@ -149,6 +157,18 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     if (!selection.isEmpty) {
         const ns: string = cljParser.getNamespace(text);
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
+    } else if(selectRegion) {
+        let start = selection.start.line;
+        while(start > 0 && !editor.document.lineAt(start).isEmptyOrWhitespace) {
+            start--;
+        }
+
+        let end = selection.start.line;
+        while(end < editor.document.lineCount && !editor.document.lineAt(end).isEmptyOrWhitespace) {
+            end++;
+        }
+
+        text = editor.document.getText(new vscode.Range(new vscode.Position(start, 0), new vscode.Position(end, 0)));
     }
 
     cljConnection.sessionForFilename(editor.document.fileName).then(session => {

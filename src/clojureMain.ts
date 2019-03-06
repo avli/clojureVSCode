@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { CLOJURE_MODE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
-import { clojureEval, clojureEvalAndShowResult, testNamespace, runAllTests } from './clojureEval';
+import { clojureEval, clojureEvalRegion, clojureEvalAndShowResult, clojureEvalRegionAndShowResult, testNamespace, runAllTests } from './clojureEval';
 import { ClojureDefinitionProvider } from './clojureDefinition';
 import { ClojureLanguageConfiguration } from './clojureConfiguration';
 import { ClojureHoverProvider } from './clojureHover';
@@ -33,7 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     const evaluationResultChannel = vscode.window.createOutputChannel('Evaluation results');
     vscode.commands.registerCommand('clojureVSCode.eval', () => clojureEval(evaluationResultChannel));
+    vscode.commands.registerCommand('clojureVSCode.evalRegion', () => clojureEvalRegion(evaluationResultChannel));
     vscode.commands.registerCommand('clojureVSCode.evalAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
+    vscode.commands.registerCommand('clojureVSCode.evalRegionAndShowResult', () => clojureEvalAndShowResult(evaluationResultChannel));
 
     vscode.commands.registerCommand('clojureVSCode.testNamespace', () => testNamespace(evaluationResultChannel, testResultDataProvidier));
     vscode.commands.registerCommand('clojureVSCode.runAllTests', () => runAllTests(evaluationResultChannel, testResultDataProvidier));

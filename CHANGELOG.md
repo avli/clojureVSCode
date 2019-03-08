@@ -1,3 +1,7 @@
+# Version 0.10.4
+
+Show the full stacktrace on an evaluation error.
+
 # Version 0.10.3
 
 Updates the embedded nREPL cider-nrepl version.

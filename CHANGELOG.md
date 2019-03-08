@@ -1,3 +1,7 @@
+# Version 0.10.5
+
+Fix namespace evaluation for modules beginning with a semicolon.
+
 # Version 0.10.4
 
 Show the full stacktrace on an evaluation error.

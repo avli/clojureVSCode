@@ -177,26 +177,32 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
 
     return nreplClient.stacktrace(session)
         .then(stacktraceObjs => {
-            const stacktraceObj = stacktraceObjs[0];
+            stacktraceObjs.forEach((stacktraceObj: any) => {
+                if (stacktraceObj.status && stacktraceObj.status.indexOf("done") >= 0) {
+                    return;
+                }
 
-            let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
-            let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;
+                let errLine = stacktraceObj.line !== undefined ? stacktraceObj.line - 1 : 0;
+                let errChar = stacktraceObj.column !== undefined ? stacktraceObj.column - 1 : 0;
 
-            if (!selection.isEmpty) {
-                errLine += selection.start.line;
-                errChar += selection.start.character;
-            }
+                if (!selection.isEmpty) {
+                    errLine += selection.start.line;
+                    errChar += selection.start.character;
+                }
 
-            outputChannel.appendLine(`${stacktraceObj.class} ${stacktraceObj.message}`);
-            outputChannel.appendLine(` at ${stacktraceObj.file}:${errLine}:${errChar}`);
+                outputChannel.appendLine(`${stacktraceObj.class} ${stacktraceObj.message}`);
+                if (stacktraceObj.file) {
+                    outputChannel.appendLine(` at ${stacktraceObj.file}:${errLine}:${errChar}`);
+                }
 
-            stacktraceObj.stacktrace.forEach((trace: any) => {
-                if (trace.flags.indexOf('tooling') > -1)
-                    outputChannel.appendLine(`    ${trace.class}.${trace.method} (${trace.file}:${trace.line})`);
+                stacktraceObj.stacktrace.forEach((trace: any) => {
+                    if (trace.flags.indexOf('tooling') > -1)
+                        outputChannel.appendLine(`    ${trace.class}.${trace.method} (${trace.file}:${trace.line})`);
+                });
+
+                outputChannel.show(true);
+                nreplClient.close(session);
             });
-
-            outputChannel.show(true);
-            nreplClient.close(session);
         });
 }
 

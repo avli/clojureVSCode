@@ -131,7 +131,7 @@ const containsValue = (map: Map<any, any>, checkValue: any): boolean => {
 };
 
 const getNamespace = (text: string): string => {
-    const m = text.match(/^[\s\t]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
+    const m = text.match(/^[;\s\t\n]*\((?:[\s\t\n]*(?:in-){0,1}ns)[\s\t\n]+'?([\w\-.]+)[\s\S]*\)[\s\S]*/);
     return m ? m[1] : 'user';
 };
 

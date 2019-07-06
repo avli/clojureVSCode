@@ -1,3 +1,7 @@
+# Version 0.10.6
+
+Upgrade the Clojure and JavaScript dependencies.
+
 # Version 0.10.5
 
 Fix namespace evaluation for modules beginning with a semicolon.

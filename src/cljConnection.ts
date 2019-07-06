@@ -155,20 +155,6 @@ const disconnect = (showMessage: boolean = true): void => {
 };
 
 const getLocalNReplPort = (): number | undefined => {
-    const activeTextEditor = vscode.window.activeTextEditor
-    if (activeTextEditor && activeTextEditor.document.fileName) {
-        let d = path.dirname(activeTextEditor.document.fileName);
-        let prev = null;
-        while (d != prev) {
-            const p = path.resolve(d, ".nrepl-port");
-            if (fs.existsSync(p)) {
-                return getPortFromFS(p);
-            }
-            prev = d;
-            d = path.resolve(d, "..");
-        }
-    }
-
     const projectDir = vscode.workspace.rootPath;
     if (projectDir) {
         const projectPort: number = getPortFromFS(path.join(projectDir, '.nrepl-port'));

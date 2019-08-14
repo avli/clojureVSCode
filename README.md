@@ -60,8 +60,8 @@ The method from the [Quickstart section](#Quickstart) utilizes the so-called emb
 option in your VSCode settings globally or per-project and connect manually to whichever REPL instance you want by "Clojure: Connect to a running nREPL" command. Note, that in order to make the autocompletion, go to definition, and formatting functionality work you have to write necessary dependencies in your `profiles.clj`. Put the following content to your `~/.lein/profiles.clj` for macOS and Linux:
 
 ```clojure
-{:user {:plugins  [[cider/cider-nrepl "0.20.0"]]
-       :dependencies [[org.clojure/tools.nrepl "0.2.13"]
+{:user {:plugins  [[cider/cider-nrepl "0.21.1"]]
+       :dependencies [[nrepl "0.2.13"]
                       [cljfmt "0.5.7"]]}}
 ```
 

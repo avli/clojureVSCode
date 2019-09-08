@@ -84,7 +84,7 @@ The embedded nREPL **does not** support ClojureScript, consider to use the "cloj
 
 ```clojure
 (require 'cljs.repl.node)
-(cemerick.piggieback/cljs-repl (cljs.repl.node/repl-env))
+(cider.piggieback/cljs-repl (cljs.repl.node/repl-env))
 ```
 
 After that you can connect to the nREPL using the "Clojure: Connect to a running nREPL" command. Now you can evaluate you ClojureScript code and use the other extension facilities.

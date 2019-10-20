@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 interface ExpressionInfo {
     functionName: string;
     parameterPosition: number;
@@ -13,16 +15,18 @@ const CLJ_TEXT_ESCAPE = `\\`;
 const CLJ_COMMENT_DELIMITER = `;`;
 const R_CLJ_WHITE_SPACE = /\s|,/;
 const R_CLJ_OPERATOR_DELIMITERS = /\s|,|\(|{|\[/;
+const OPEN_CLJ_BLOCK_BRACKET = `(`;
+const CLOSE_CLJ_BLOCK_BRACKET = `)`;
 
 /** { close_char open_char } */
 const CLJ_EXPRESSION_DELIMITERS: Map<string, string> = new Map<string, string>([
     [`}`, `{`],
-    [`)`, `(`],
+    [CLOSE_CLJ_BLOCK_BRACKET, OPEN_CLJ_BLOCK_BRACKET],
     [`]`, `[`],
     [CLJ_TEXT_DELIMITER, CLJ_TEXT_DELIMITER],
 ]);
 
-const getExpressionInfo = (text: string): ExpressionInfo | undefined  => {
+const getExpressionInfo = (text: string): ExpressionInfo | undefined => {
     text = removeCljComments(text);
     const relativeExpressionInfo = getRelativeExpressionInfo(text);
     if (!relativeExpressionInfo)
@@ -135,8 +139,121 @@ const getNamespace = (text: string): string => {
     return m ? m[1] : 'user';
 };
 
+// end index is not included
+const range = (start: number, end: number): Array<number> => {
+    if (start < end) {
+        const length = end - start;
+        return Array.from(Array(length), (_, i) => start + i);
+    } else {
+        const length = start - end;
+        return Array.from(Array(length), (_, i) => start - i);
+    }
+}
+
+const findNearestBracket = (
+    editor: vscode.TextEditor,
+    current: vscode.Position,
+    bracket: string): vscode.Position | undefined => {
+
+    const isBackward = bracket == OPEN_CLJ_BLOCK_BRACKET;
+    // "open" and "close" brackets as keys related to search direction
+    let openBracket = OPEN_CLJ_BLOCK_BRACKET,
+        closeBracket = CLOSE_CLJ_BLOCK_BRACKET;
+    if (isBackward) {
+        [closeBracket, openBracket] = [openBracket, closeBracket]
+    };
+
+    let bracketStack: string[] = [],
+        // get begin of text if we are searching `(` and end of text otherwise
+        lastLine = isBackward ? -1 : editor.document.lineCount,
+        lineRange = range(current.line, lastLine);
+
+    for (var line of lineRange) {
+        const textLine = editor.document.lineAt(line);
+        if (textLine.isEmptyOrWhitespace) continue;
+
+        // get line and strip clj comments
+        const firstChar = textLine.firstNonWhitespaceCharacterIndex,
+            strippedLine = removeCljComments(textLine.text);
+        let startColumn = firstChar,
+            endColumn = strippedLine.length;
+        if (isBackward) {
+            // dec both as `range` doesn't include an end edge
+            [startColumn, endColumn] = [endColumn - 1, startColumn - 1];
+        }
+
+        // get current current char index if it is first iteration of loop
+        if (current.line == line) {
+            let currentColumn = current.character;
+            // set current position as start
+            if (isBackward) {
+                if (currentColumn <= endColumn) continue;
+                startColumn = currentColumn;
+                if ([openBracket, closeBracket].indexOf(strippedLine[startColumn]) > -1) {
+                    startColumn--;
+                };
+            } else if (currentColumn <= endColumn) {
+                startColumn = currentColumn;
+            }
+        }
+
+        // search nearest bracket
+        for (var column of range(startColumn, endColumn)) {
+            const char = strippedLine[column];
+            if (!bracketStack.length && char == bracket) {
+                // inc column if `char` is a `)` to get correct selection
+                if (!isBackward) column++;
+                return new vscode.Position(line, column);
+            } else if (char == openBracket) {
+                bracketStack.push(char);
+                // check if inner block is closing
+            } else if (char == closeBracket && bracketStack.length > 0) {
+                bracketStack.pop();
+            };
+        };
+    }
+};
+
+
+const getCurrentBlock = (
+    editor: vscode.TextEditor,
+    left?: vscode.Position,
+    right?: vscode.Position): vscode.Selection | undefined => {
+
+    if (!left || !right) {
+        left = right = editor.selection.active;
+    };
+    const prevBracket = findNearestBracket(editor, left, OPEN_CLJ_BLOCK_BRACKET);
+    if (!prevBracket) return;
+
+    const nextBracket = findNearestBracket(editor, right, CLOSE_CLJ_BLOCK_BRACKET);
+    if (nextBracket) {
+        return new vscode.Selection(prevBracket, nextBracket);
+    }
+};
+
+const getOuterBlock = (
+    editor: vscode.TextEditor,
+    left?: vscode.Position,
+    right?: vscode.Position): vscode.Selection | undefined => {
+
+    if (!left || !right) {
+        left = right = editor.selection.active;
+    };
+
+    const nextBlock = getCurrentBlock(editor, left, right);
+
+    if (nextBlock) {
+        return getOuterBlock(editor, nextBlock.anchor, nextBlock.active);
+    } else if (right != left) {
+        return new vscode.Selection(left, right);
+    };
+}
+
 export const cljParser = {
     R_CLJ_WHITE_SPACE,
     getExpressionInfo,
     getNamespace,
+    getCurrentBlock,
+    getOuterBlock,
 };

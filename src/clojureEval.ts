@@ -5,6 +5,12 @@ import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
 import { TestListener } from './testRunner';
 
+const HIGHLIGHTING_TIMEOUT = 350;
+const BLOCK_DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
+    backgroundColor: { id: 'editor.findMatchHighlightBackground' },
+    borderRadius: '2px',
+});
+
 export function clojureEval(outputChannel: vscode.OutputChannel): void {
     evaluate(outputChannel, false);
 }
@@ -135,6 +141,17 @@ export function runAllTests(outputChannel: vscode.OutputChannel, listener: TestL
     runTests(outputChannel, listener);
 }
 
+const highlightSelection = (editor: vscode.TextEditor, selection: vscode.Selection) => {
+    let selectionRange = new vscode.Range(selection.start, selection.end);
+    // setup highlighting of evaluated block
+    editor.setDecorations(BLOCK_DECORATION_TYPE, [selectionRange])
+    // stop highlighting of block after timeout
+    setTimeout(() => {
+        editor.setDecorations(BLOCK_DECORATION_TYPE, [])
+    },
+        HIGHLIGHTING_TIMEOUT);
+};
+
 function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): void {
     if (!cljConnection.isConnected()) {
         vscode.window.showWarningMessage('You should connect to nREPL first to evaluate code.');
@@ -144,7 +161,20 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     const editor = vscode.window.activeTextEditor;
 
     if (!editor) return;
-    const selection = editor.selection;
+
+    // select and highlight appropriate block if selection is empty
+    let blockSelection: vscode.Selection | undefined;
+    if (editor.selection.isEmpty) {
+        blockSelection = showResults ? cljParser.getCurrentBlock(editor) : cljParser.getOuterBlock(editor);
+        if (blockSelection) {
+            highlightSelection(editor, blockSelection);
+            console.log("eval:\n", editor.document.getText(blockSelection));
+        } else {
+            console.log("eval:", "Whole file");
+        }
+    }
+
+    const selection = blockSelection || editor.selection;
     let text = editor.document.getText();
     if (!selection.isEmpty) {
         const ns: string = cljParser.getNamespace(text);

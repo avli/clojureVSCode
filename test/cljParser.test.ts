@@ -38,7 +38,7 @@ suite('cljParser.getCurrentBlock', () => {
     // title, line, character, expected
     let cases: [string, number, number, string | undefined][] = [
         ['Position on the same line', 16, 9, '(prn "test")'],
-        ['Position in the middle of multiline block', 22, 6,
+        ['Position at the middle of multiline block', 22, 5,
             '(->> numbers\n' +
             '      (map inc)\n' +
             '      (prn))'],
@@ -51,16 +51,18 @@ suite('cljParser.getCurrentBlock', () => {
             '      (map inc)\n' +
             '      (prn)))'],
         ['Comment form will be evaluated', 27, 14, '(prn "COMMENT")'],
-        ['Eval only inside bracket from right side', 23, 11,
-            '(->> numbers\n' +
-            '      (map inc)\n' +
-            '      (prn))'],
-        ['Eval only inside bracket from left side', 28, 5,
-            '((comp #(str % "!") name) :test)'],
+        ['Eval only outside bracket from right side', 23, 11, '(prn)'],
+        ['Eval only outside bracket from left side', 28, 5,
+            '(comp #(str % "!") name)'],
         ['Eval only round bracket block', 20, 12, '(prn [@VAL])'],
-        ['Eval when only inside of the block', 23, 14, undefined],
-        ['Begin of file', 0, 0, undefined],
-        ['End of file', 37, 0, undefined],
+        ['Eval when only inside of the block', 24, 0, undefined],
+        ['Begin of file', 0, 0,
+            '(ns user\n' +
+            '    (:require [clojure.tools.namespace.repl :refer [set-refresh-dirs]]\n' +
+            '              [reloaded.repl :refer [system stop go reset]]\n' +
+            '              [myproject.config :refer [config]]\n' +
+            '              [myproject.core :refer [new-system]]))'],
+        ['End of file', 37, 0, undefined]
     ];
     testBlockSelection('Eval current block', cljParser.getCurrentBlock, 'evalBlock.clj', cases);
 });
@@ -73,8 +75,23 @@ suite('cljParser.getOuterBlock', () => {
             '  []\n' +
             '  (let [_ 1]\n' +
             '    (new-system (config))))'],
-        ['Outer block not found', 23, 14, undefined],
-        ['Begin of file', 0, 0, undefined],
+        ['Outer block from outside left bracket', 8, 0,
+            '(defn new-system-dev\n' +
+            '  []\n' +
+            '  (let [_ 1]\n' +
+            '    (new-system (config))))'],
+        ['Outer block from outside right bracket', 28, 38,
+            '(comment\n' +
+            '  (do\n' +
+            '    #_(prn "COMMENT")\n' +
+            '    ((comp #(str % "!") name) :test)))'],
+        ['Outer block not found', 24, 0, undefined],
+        ['Begin of file', 0, 0,
+            '(ns user\n' +
+            '    (:require [clojure.tools.namespace.repl :refer [set-refresh-dirs]]\n' +
+            '              [reloaded.repl :refer [system stop go reset]]\n' +
+            '              [myproject.config :refer [config]]\n' +
+            '              [myproject.core :refer [new-system]]))'],
         ['End of file', 37, 0, undefined],
     ];
     testBlockSelection('Eval outer block', cljParser.getOuterBlock, 'evalBlock.clj', cases);

@@ -182,18 +182,27 @@ const findNearestBracket = (
             [startColumn, endColumn] = [endColumn - 1, startColumn - 1];
         }
 
-        // get current current char index if it is first iteration of loop
+        // select block if cursor right after the closed bracket or right before opening
         if (current.line == line) {
+            // get current current char index if it is first iteration of loop
             let currentColumn = current.character;
             // set current position as start
             if (isBackward) {
                 if (currentColumn <= endColumn) continue;
                 startColumn = currentColumn;
-                if ([openBracket, closeBracket].indexOf(strippedLine[startColumn]) > -1) {
+                if (strippedLine[startColumn - 1] == CLOSE_CLJ_BLOCK_BRACKET) {
+                    startColumn = startColumn - 2;
+                } else if (strippedLine[startColumn] == CLOSE_CLJ_BLOCK_BRACKET) {
                     startColumn--;
                 };
             } else if (currentColumn <= endColumn) {
+                // forward direction
                 startColumn = currentColumn;
+                if (strippedLine[startColumn - 1] == CLOSE_CLJ_BLOCK_BRACKET) {
+                    startColumn--;
+                } else if (strippedLine[startColumn] == OPEN_CLJ_BLOCK_BRACKET) {
+                    startColumn++;
+                };
             }
         }
 
@@ -235,7 +244,8 @@ const getCurrentBlock = (
 const getOuterBlock = (
     editor: vscode.TextEditor,
     left?: vscode.Position,
-    right?: vscode.Position): vscode.Selection | undefined => {
+    right?: vscode.Position,
+    prevBlock?: vscode.Selection): vscode.Selection | undefined => {
 
     if (!left || !right) {
         left = right = editor.selection.active;
@@ -244,9 +254,32 @@ const getOuterBlock = (
     const nextBlock = getCurrentBlock(editor, left, right);
 
     if (nextBlock) {
-        return getOuterBlock(editor, nextBlock.anchor, nextBlock.active);
+        // calculate left position one step before
+        if (nextBlock.anchor.character > 0) {
+            left = new vscode.Position(nextBlock.anchor.line,
+                                       nextBlock.anchor.character - 1);
+        } else if (nextBlock.anchor.line > 0) {
+            const line = nextBlock.anchor.line - 1;
+            left = editor.document.lineAt(line).range.end;
+        } else {
+            return new vscode.Selection(nextBlock.anchor, nextBlock.active);
+        }
+
+        // calculate right position one step after
+        const lineLength = editor.document.lineAt(nextBlock.active.line).text.length;
+        if (nextBlock.active.character < lineLength) {
+            right = new vscode.Position(nextBlock.active.line,
+                                        nextBlock.active.character + 1);
+        } else if (nextBlock.active.line < editor.document.lineCount - 1) {
+            right = new vscode.Position(nextBlock.active.line + 1, 0);
+        } else {
+            return new vscode.Selection(nextBlock.anchor, nextBlock.active);
+        };
+
+        // try to find next outer block
+        return getOuterBlock(editor, left, right, nextBlock);
     } else if (right != left) {
-        return new vscode.Selection(left, right);
+        return prevBlock;
     };
 }
 

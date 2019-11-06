@@ -7,8 +7,7 @@ import { TestListener } from './testRunner';
 
 const HIGHLIGHTING_TIMEOUT = 350;
 const BLOCK_DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
-    backgroundColor: { id: 'editor.findMatchHighlightBackground' },
-    borderRadius: '2px',
+    backgroundColor: { id: 'editor.findMatchHighlightBackground' }
 });
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {

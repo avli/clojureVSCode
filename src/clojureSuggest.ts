@@ -23,13 +23,13 @@ export class ClojureCompletionItemProvider implements vscode.CompletionItemProvi
         if (!cljConnection.isConnected())
             return Promise.reject('No nREPL connected.');
 
-        let wordRange = document.getWordRangeAtPosition(position);
+        const wordRange = document.getWordRangeAtPosition(position);
         if (!wordRange)
             return Promise.reject('No word selected.');
 
-        let line = document.lineAt(position.line),
-            currentWord = line.text.slice(wordRange.start.character, wordRange.end.character),
-            ns = cljParser.getNamespace(document.getText());
+        const line = document.lineAt(position.line),
+              currentWord = line.text.slice(wordRange.start.character, wordRange.end.character),
+              ns = cljParser.getNamespace(document.getText());
 
         let buildInsertText = (suggestion: string) => {
             return suggestion[0] === '.' ? suggestion.slice(1) : suggestion;

@@ -127,6 +127,6 @@ async function getEditor(fileName: string): Promise<vscode.TextEditor> {
     const uri = vscode.Uri.file(path.join(__dirname + testFolderLocation + fileName)),
         document = await vscode.workspace.openTextDocument(uri),
         editor = await vscode.window.showTextDocument(document);
-    await sleep(600);
+    await sleep(15000);
     return editor;
 };

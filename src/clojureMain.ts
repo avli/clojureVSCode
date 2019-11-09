@@ -19,9 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(nreplController);
     cljConnection.disconnect(false);
     var config = vscode.workspace.getConfiguration('clojureVSCode');
-    if (config.autoStartNRepl) {
-        cljConnection.startNRepl();
-    }
+    // if (config.autoStartNRepl) {
+    //     cljConnection.startNRepl();
+    // }
 
     maybeActivateFormatOnSave();
 

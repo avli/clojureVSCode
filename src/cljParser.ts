@@ -139,7 +139,11 @@ const getNamespace = (text: string): string => {
     return m ? m[1] : 'user';
 };
 
-// end index is not included
+/** A range of numbers between `start` and `end`.
+
+ * The `end` index is not included and `end` could be before `start`.
+ * Whereas default `vscode.Range` requires that `start` should be
+ * before or equal than `end`. */
 const range = (start: number, end: number): Array<number> => {
     if (start < end) {
         const length = end - start;
@@ -199,7 +203,7 @@ const findNearestBracket = (
                 // forward direction
                 startColumn = currentColumn;
                 if (strippedLine[startColumn - 1] == CLOSE_CLJ_BLOCK_BRACKET) {
-                    startColumn--;
+                    return new vscode.Position(line, startColumn);
                 } else if (strippedLine[startColumn] == OPEN_CLJ_BLOCK_BRACKET) {
                     startColumn++;
                 };

@@ -99,7 +99,7 @@ suite('cljParser.getOuterBlock', () => {
 
 function testBlockSelection(
     title: string,
-    getBlockFn: CallableFunction,
+    getBlockFn: (editor: vscode.TextEditor) => vscode.Selection | undefined,
     fileName: string,
     cases: [string, number, number, string | undefined][]) {
 
@@ -109,9 +109,9 @@ function testBlockSelection(
         for (let [title, line, character, expected] of cases) {
             const currentPosition = new vscode.Position(line, character);
             editor.selection = new vscode.Selection(currentPosition, currentPosition);
-            let blockSelection = getBlockFn(editor);
-            blockSelection = blockSelection ? editor.document.getText(blockSelection) : blockSelection;
-            assert.equal(blockSelection, expected, title)
+            const blockSelection = getBlockFn(editor),
+                  text = blockSelection ? editor.document.getText(blockSelection) : blockSelection;
+            assert.equal(text, expected, title)
         };
         vscode.commands.executeCommand('workbench.action.closeActiveEditor');
     });
@@ -127,6 +127,6 @@ async function getEditor(fileName: string): Promise<vscode.TextEditor> {
     const uri = vscode.Uri.file(path.join(__dirname + testFolderLocation + fileName)),
         document = await vscode.workspace.openTextDocument(uri),
         editor = await vscode.window.showTextDocument(document);
-    await sleep(500);
+    await sleep(600);
     return editor;
 };

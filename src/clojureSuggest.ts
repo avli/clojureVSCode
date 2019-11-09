@@ -23,14 +23,13 @@ export class ClojureCompletionItemProvider implements vscode.CompletionItemProvi
         if (!cljConnection.isConnected())
             return Promise.reject('No nREPL connected.');
 
-        // TODO: Use VSCode means for getting a current word
-        let lineText = document.lineAt(position.line).text;
-        let words: string[] = lineText.split(' ');
-        let currentWord = words[words.length - 1].replace(/^[\('\[\{]+|[\)\]\}]+$/g, '');
-        let text = document.getText()
-        let ns = cljParser.getNamespace(text);
+        let wordRange = document.getWordRangeAtPosition(position);
+        if (!wordRange)
+            return Promise.reject('No word selected.');
 
-        let currentWordLength: number = currentWord.length;
+        let line = document.lineAt(position.line),
+            currentWord = line.text.slice(wordRange.start.character, wordRange.end.character),
+            ns = cljParser.getNamespace(document.getText());
 
         let buildInsertText = (suggestion: string) => {
             return suggestion[0] === '.' ? suggestion.slice(1) : suggestion;

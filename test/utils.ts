@@ -1,3 +1,5 @@
+import { ISuiteCallbackContext } from "mocha";
+
 const LONG_TIMEOUT: number = 5000;
 
 /**
@@ -7,10 +9,7 @@ const LONG_TIMEOUT: number = 5000;
  *
  * @param suite: A test suite instance.
  */
-const setLongTimeout = (suite: Mocha.IContextDefinition): void => {
+export const setLongTimeout = (
+    suite: Mocha.IContextDefinition | ISuiteCallbackContext): void => {
     suite.timeout(LONG_TIMEOUT);
-}
-
-export const utils = {
-    setLongTimeout,
 }

@@ -1,3 +1,14 @@
+# Version 0.11.0
+
+Adds ability to evaluate blocks of code without selection [61](https://github.com/avli/clojureVSCode/issues/61):
+
+![eval-block](https://user-images.githubusercontent.com/1375411/68340984-874bc280-00f8-11ea-9eea-34c7160b8c05.gif)
+
+Use the "Clojure: Eval and show the result command" for evaluation of the current
+code block and "Clojure: Eval" for the outer.
+
+Fixes the issue with completion in the middle of a line [139](https://github.com/avli/clojureVSCode/issues/139).
+
 # Version 0.10.5
 
 Fix namespace evaluation for modules beginning with a semicolon.

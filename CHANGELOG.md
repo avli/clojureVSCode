@@ -1,3 +1,7 @@
+# Version 0.11.1
+
+Fix-up release. Reenable automatic nREPL starting.
+
 # Version 0.11.0
 
 Adds ability to evaluate blocks of code without selection [61](https://github.com/avli/clojureVSCode/issues/61):

@@ -127,9 +127,11 @@ function sleep(ms: number): Promise<void> {
 };
 
 async function getEditor(fileName: string): Promise<vscode.TextEditor> {
+    const configuration = vscode.workspace.getConfiguration();
+    configuration.update("clojureVSCode.autoStartNRepl", false);
     const uri = vscode.Uri.file(path.join(__dirname + testFolderLocation + fileName)),
         document = await vscode.workspace.openTextDocument(uri),
         editor = await vscode.window.showTextDocument(document);
-    await sleep(1500);
+    await sleep(600);
     return editor;
 };

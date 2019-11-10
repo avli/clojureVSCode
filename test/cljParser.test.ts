@@ -2,10 +2,11 @@ import * as assert from 'assert';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { cljParser } from '../src/cljParser';
+import { setLongTimeout } from './utils';
 
 const testFolderLocation = '/../../test/documents/';
 
-suite('cljParser.getNamespace', () => {
+suite('cljParser.getNamespace', function() {
     let cases = [
         ['user', ''],
         ['foo', '(ns foo)'],
@@ -34,8 +35,9 @@ suite('cljParser.getNamespace', () => {
     }
 });
 
-suite('cljParser.getCurrentBlock', () => {
+suite('cljParser.getCurrentBlock', function() {
     // title, line, character, expected
+    setLongTimeout(this);
     let cases: [string, number, number, string | undefined][] = [
         ['Position on the same line', 16, 9, '(prn "test")'],
         ['Position at the middle of multiline block', 22, 5,
@@ -67,8 +69,9 @@ suite('cljParser.getCurrentBlock', () => {
     testBlockSelection('Eval current block', cljParser.getCurrentBlock, 'evalBlock.clj', cases);
 });
 
-suite('cljParser.getOuterBlock', () => {
+suite('cljParser.getOuterBlock', function() {
     // title, line, character, expected
+    setLongTimeout(this);
     let cases: [string, number, number, string | undefined][] = [
         ['Get outermost block of function definition', 11, 20,
             '(defn new-system-dev\n' +

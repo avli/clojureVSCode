@@ -1,3 +1,6 @@
-import vscode = require('vscode');
+export const LANGUAGE = 'clojure';
 
-export const CLOJURE_MODE = { language: 'clojure', scheme: 'file' };
+export const CLOJURE_MODE = [
+    { language: LANGUAGE, scheme: 'file' },
+    { language: LANGUAGE, scheme: 'jar' }
+];

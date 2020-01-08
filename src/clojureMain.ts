@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { CLOJURE_MODE } from './clojureMode';
+import { CLOJURE_MODE, LANGUAGE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
 import { clojureEval, clojureEvalAndShowResult, testNamespace, runAllTests } from './clojureEval';
 import { ClojureDefinitionProvider } from './clojureDefinition';
@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.languages.registerSignatureHelpProvider(CLOJURE_MODE, new ClojureSignatureProvider(), ' ', '\n'));
 
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
-    vscode.languages.setLanguageConfiguration(CLOJURE_MODE.language, ClojureLanguageConfiguration);
+    vscode.languages.setLanguageConfiguration(LANGUAGE, ClojureLanguageConfiguration);
 }
 
 export function deactivate() { }

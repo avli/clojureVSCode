@@ -1,3 +1,7 @@
+# Version 0.11.2
+
+Makes it possible to pick definitions from JAR files (Clojure only) [111](https://github.com/avli/clojureVSCode/issues/111).
+
 # Version 0.11.1
 
 Fix-up release. Reenable automatic nREPL starting.

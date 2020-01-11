@@ -10,3 +10,4 @@ webpack.config.js
 node_modules/**
 _config.yml
 images/**
+!images/icon.png

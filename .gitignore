@@ -3,3 +3,4 @@ node_modules
 .vscode/.browse*
 *.vsix
 *.vscode-test
+dist

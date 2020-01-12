@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 import { cljConnection } from './cljConnection';
-import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
 
 function slashEscape(contents: string) {
@@ -18,15 +17,14 @@ function slashUnescape(contents: string) {
     });
 }
 
-export const formatFile = (textEditor: vscode.TextEditor, edit?: vscode.TextEditorEdit): void => {
+
+export const formatFile = (document: vscode.TextDocument, range: vscode.Range): Promise<vscode.TextEdit[] | undefined> => {
 
     if (!cljConnection.isConnected()) {
-        vscode.window.showErrorMessage("Formatting functions don't work, connect to nREPL first.");
-        return;
+        return Promise.reject("Formatting functions don't work, connect to nREPL first.");
     }
 
-    const selection = textEditor.selection;
-    let contents: string = selection.isEmpty ? textEditor.document.getText() : textEditor.document.getText(selection);
+    let contents: string = document.getText(range);
 
     // Escaping the string before sending it to nREPL
     contents = slashEscape(contents)
@@ -41,27 +39,19 @@ export const formatFile = (textEditor: vscode.TextEditor, edit?: vscode.TextEdit
     // time it is called. I have no idea what causes this behavior so I decided to put the require
     // statement right here - don't think it does any harm. If someone knows how to fix it
     // please send a pull request with a fix.
-    nreplClient.evaluate(`(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`)
+    return nreplClient.evaluate(`(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`)
         .then(value => {
             if ('ex' in value[0]) {
-                vscode.window.showErrorMessage(value[1].err);
-                return;
+                return Promise.reject(value[1].err);
             };
             if (('value' in value[1]) && (value[1].value != 'nil')) {
                 let new_content: string = value[1].value.slice(1, -1);
                 new_content = slashUnescape(new_content);
-                let selection = textEditor.selection;
-                if (textEditor.selection.isEmpty) {
-                    const lines: string[] = textEditor.document.getText().split(/\r?\n/g);
-                    const lastChar: number = lines[lines.length - 1].length;
-                    selection = new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(textEditor.document.lineCount, lastChar));
-                }
-                textEditor.edit(editBuilder => {
-                    editBuilder.replace(selection, new_content);
-                });
+                return Promise.resolve([vscode.TextEdit.replace(range, new_content)]);
             };
         });
 }
+
 
 export const maybeActivateFormatOnSave = () => {
     vscode.workspace.onWillSaveTextDocument(e => {
@@ -70,14 +60,39 @@ export const maybeActivateFormatOnSave = () => {
             return;
         }
         let textEditor = vscode.window.activeTextEditor;
-        if (!textEditor) {
+        if (!textEditor || textEditor.document.isClosed) {
             return
         }
         let editorConfig = vscode.workspace.getConfiguration('editor');
-        const globalEditorFormatOnSave = editorConfig && editorConfig.has('formatOnSave') && editorConfig.get('formatOnSave') === true;
-        let clojureConfig = vscode.workspace.getConfiguration('clojureVSCode');
+        const globalEditorFormatOnSave = editorConfig && editorConfig.has('formatOnSave') && editorConfig.get('formatOnSave') === true,
+            clojureConfig = vscode.workspace.getConfiguration('clojureVSCode'),
+            currentText = textEditor.document.getText(),
+            lastLine = textEditor.document.lineCount - 1,
+            lastPosition = textEditor.document.lineAt(lastLine).range.end,
+            range = new vscode.Range(new vscode.Position(0, 0), lastPosition);
+
         if ((clojureConfig.formatOnSave || globalEditorFormatOnSave) && textEditor.document === document) {
-            formatFile(textEditor, undefined);
+            formatFile(textEditor.document, range).then(value => {
+                if (textEditor && value && currentText != value[0].newText) {
+                    textEditor.edit(editBuilder => {
+                        editBuilder.replace(range, value[0].newText);
+                    });
+                }
+            }).catch(reason => {
+                vscode.window.showErrorMessage(reason);
+            });
         }
     });
+}
+
+
+export class ClojureRangeFormattingEditProvider implements vscode.DocumentRangeFormattingEditProvider {
+    provideDocumentRangeFormattingEdits(
+        document: vscode.TextDocument,
+        range: vscode.Range,
+        options: vscode.FormattingOptions,
+        token: vscode.CancellationToken): vscode.ProviderResult<vscode.TextEdit[]> {
+
+        return formatFile(document, range);
+    }
 }

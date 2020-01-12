@@ -10,7 +10,7 @@ import { ClojureSignatureProvider } from './clojureSignature';
 import { JarContentProvider } from './jarContentProvider';
 import { nreplController } from './nreplController';
 import { cljConnection } from './cljConnection';
-import { formatFile, maybeActivateFormatOnSave } from './clojureFormat';
+import { ClojureRangeFormattingEditProvider, maybeActivateFormatOnSave } from './clojureFormat';
 
 import { buildTestProvider } from './testRunner'
 
@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('clojureVSCode.runAllTests', () => runAllTests(evaluationResultChannel, testResultDataProvidier));
     vscode.window.registerTreeDataProvider('clojure', testResultDataProvidier);
 
-    vscode.commands.registerTextEditorCommand('clojureVSCode.formatFile', formatFile);
+    context.subscriptions.push(vscode.languages.registerDocumentRangeFormattingEditProvider(CLOJURE_MODE, new ClojureRangeFormattingEditProvider()));
 
     context.subscriptions.push(vscode.languages.registerCompletionItemProvider(CLOJURE_MODE, new ClojureCompletionItemProvider(), '.', '/'));
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(CLOJURE_MODE, new ClojureDefinitionProvider()));

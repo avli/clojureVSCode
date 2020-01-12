@@ -95,10 +95,6 @@
             {
                 "command": "clojureVSCode.stopDisconnectNRepl",
                 "title": "Clojure: Disconnect from nREPL"
-            },
-            {
-                "command": "clojureVSCode.formatFile",
-                "title": "Clojure: Format file or selection"
             }
         ],
         "views": {

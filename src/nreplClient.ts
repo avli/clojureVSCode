@@ -139,16 +139,11 @@ const send = (msg: Message, connection?: CljConnectionInformation): Promise<any[
         const respObjects: any[] = [];
         client.on('data', data => {
             nreplResp = Buffer.concat([nreplResp, data]);
-            const { decodedObjects, rest } = bencodeUtil.decodeObjects(nreplResp);
+            const { decodedObjects, rest, isDone } = bencodeUtil.decodeBuffer(nreplResp);
             nreplResp = rest;
-            const validDecodedObjects = decodedObjects.reduce((objs, obj) => {
-                if (!isLastNreplObject(objs))
-                    objs.push(obj);
-                return objs;
-            }, []);
-            respObjects.push(...validDecodedObjects);
+            respObjects.push(...decodedObjects);
 
-            if (isLastNreplObject(respObjects)) {
+            if (isDone) {
                 client.end();
                 client.removeAllListeners();
                 resolve(respObjects);
@@ -157,10 +152,6 @@ const send = (msg: Message, connection?: CljConnectionInformation): Promise<any[
     });
 };
 
-const isLastNreplObject = (nreplObjects: any[]): boolean => {
-    const lastObj = [...nreplObjects].pop();
-    return lastObj && lastObj.status && lastObj.status.indexOf('done') > -1;
-}
 
 export const nreplClient = {
     complete,

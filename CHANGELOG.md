@@ -1,6 +1,6 @@
 # Version 0.12.0
 
-Uses VSCode built-in formatting provider to format code [90](https://github.com/avli/clojureVSCode/issues/90).
+Uses VSCode built-in formatting provider to format code [#90](https://github.com/avli/clojureVSCode/issues/90).
 
 # Version 0.11.3
 
@@ -8,7 +8,7 @@ Bundles the extension in order to minimize its size.
 
 # Version 0.11.2
 
-Makes it possible to pick definitions from JAR files (Clojure only) [111](https://github.com/avli/clojureVSCode/issues/111).
+Makes it possible to pick definitions from JAR files (Clojure only) [#111](https://github.com/avli/clojureVSCode/issues/111).
 
 # Version 0.11.1
 
@@ -16,14 +16,14 @@ Fix-up release. Reenable automatic nREPL starting.
 
 # Version 0.11.0
 
-Adds ability to evaluate blocks of code without selection [61](https://github.com/avli/clojureVSCode/issues/61):
+Adds ability to evaluate blocks of code without selection [#61](https://github.com/avli/clojureVSCode/issues/61):
 
 ![eval-block](https://user-images.githubusercontent.com/1375411/68340984-874bc280-00f8-11ea-9eea-34c7160b8c05.gif)
 
 Use the "Clojure: Eval and show the result command" for evaluation of the current
 code block and "Clojure: Eval" for the outer.
 
-Fixes the issue with completion in the middle of a line [139](https://github.com/avli/clojureVSCode/issues/139).
+Fixes the issue with completion in the middle of a line [#139](https://github.com/avli/clojureVSCode/issues/139).
 
 # Version 0.10.5
 
@@ -89,7 +89,7 @@ Adds experimental ClojureScript support. Please check out [README.md](https://gi
 
 # Version 0.8.2
 
-Fixes the issue with unescaping newlines that are parts of a string [64](https://github.com/avli/clojureVSCode/issues/64).
+Fixes the issue with unescaping newlines that are parts of a string [#64](https://github.com/avli/clojureVSCode/issues/64).
 
 # Version 0.8.1
 
@@ -97,19 +97,19 @@ Adds a configuration option to disable an embedded nREPL start.
 
 # Version 0.8.0
 
-Adds code formatting support [57](https://github.com/avli/clojureVSCode/issues/57).
+Adds code formatting support [#57](https://github.com/avli/clojureVSCode/issues/57).
 
 # Version 0.7.10
 
-Adds workaround for the hanging Java process issue on the Windows platform [56](https://github.com/avli/clojureVSCode/issues/56).
+Adds workaround for the hanging Java process issue on the Windows platform [#56](https://github.com/avli/clojureVSCode/issues/56).
 
 # Version 0.7.9
 
-Hotfix that detaches nREPL process on UNIX and non-detached one on Windows [56](https://github.com/avli/clojureVSCode/issues/56).
+Hotfix that detaches nREPL process on UNIX and non-detached one on Windows [#56](https://github.com/avli/clojureVSCode/issues/56).
 
 # Version 0.7.8
 
-Fixes the troubles with a hanging Java process [56](https://github.com/avli/clojureVSCode/issues/56).
+Fixes the troubles with a hanging Java process [#56](https://github.com/avli/clojureVSCode/issues/56).
 
 # Version 0.7.7
 
@@ -121,11 +121,11 @@ Does code refactoring and minor nREPL connection indicator UI fixes.
 
 # Version 0.7.5
 
-Fixes the `Unable to start nREPL` bug [47](https://github.com/avli/clojureVSCode/issues/47).
+Fixes the `Unable to start nREPL` bug [#47](https://github.com/avli/clojureVSCode/issues/47).
 
 # Version 0.7.4
 
-Fixes the nREPL connection indicator behavior [42](https://github.com/avli/clojureVSCode/issues/42).
+Fixes the nREPL connection indicator behavior [#42](https://github.com/avli/clojureVSCode/issues/42).
 
 # Version 0.7.3
 
@@ -150,7 +150,7 @@ Adds the forgotten changelog for the version 0.6.0 :-)
 
 # Version 0.6.0
 
-Changes the behavior of the `Eval` command - now it shows compilation errors in the `Output` panel [28](https://github.com/avli/clojureVSCode/issues/28).
+Changes the behavior of the `Eval` command - now it shows compilation errors in the `Output` panel [#28](https://github.com/avli/clojureVSCode/issues/28).
 
 # Version 0.5.4
 

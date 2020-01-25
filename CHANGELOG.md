@@ -1,3 +1,7 @@
+# Version 0.12.0
+
+Uses VSCode built-in formatting provider to format code [90](https://github.com/avli/clojureVSCode/issues/90).
+
 # Version 0.11.3
 
 Bundles the extension in order to minimize its size.

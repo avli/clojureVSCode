@@ -8,6 +8,7 @@ import { nreplController } from './nreplController';
 export interface CljConnectionInformation {
     host: string;
     port: number;
+    session?: string;
 }
 export interface REPLSession {
     type: 'ClojureScript' | 'Clojure';
@@ -17,6 +18,7 @@ export interface REPLSession {
 const CONNECTION_STATE_KEY: string = 'CLJ_CONNECTION';
 const DEFAULT_LOCAL_IP: string = '127.0.0.1';
 const CLJS_SESSION_KEY: string = 'CLJS_SESSION';
+const CL_SESSION_KEY: string = 'CL_SESSION';
 const connectionIndicator: vscode.StatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 
 let cljContext: vscode.ExtensionContext;
@@ -209,7 +211,8 @@ const sessionForFilename = (filename: string): Promise<REPLSession> => {
         const sessionType = filename.endsWith('.cljs') ? "ClojureScript" : "Clojure";
         if (sessionType == "Clojure") {
             // Assume that the default session is Clojure. This is always the case with cider.
-            return resolve({ type: sessionType, id: undefined });
+            const connection = getConnection()
+            return resolve({ type: sessionType, id: !connection ? connection : connection.session });
         }
 
         const session_id = cljContext.workspaceState.get<string>(CLJS_SESSION_KEY);

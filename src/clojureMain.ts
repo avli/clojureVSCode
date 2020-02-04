@@ -2,7 +2,10 @@ import * as vscode from 'vscode';
 
 import { CLOJURE_MODE, LANGUAGE } from './clojureMode';
 import { ClojureCompletionItemProvider } from './clojureSuggest';
-import { clojureEval, clojureEvalAndShowResult, testNamespace, runAllTests } from './clojureEval';
+import {
+    clojureEval, clojureEvalAndShowResult, testNamespace, runAllTests,
+    clearInlineResultDecorationOnMove
+} from './clojureEval';
 import { ClojureDefinitionProvider } from './clojureDefinition';
 import { ClojureLanguageConfiguration } from './clojureConfiguration';
 import { ClojureHoverProvider } from './clojureHover';
@@ -48,6 +51,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.registerTextDocumentContentProvider('jar', new JarContentProvider());
     vscode.languages.setLanguageConfiguration(LANGUAGE, ClojureLanguageConfiguration);
+
+    // events
+    vscode.window.onDidChangeTextEditorSelection(event => {
+        clearInlineResultDecorationOnMove(event);
+    }, null, context.subscriptions);
 }
 
 export function deactivate() { }

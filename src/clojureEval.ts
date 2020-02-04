@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { cljConnection } from './cljConnection';
+import { LANGUAGE } from './clojureMode';
 import { cljParser } from './cljParser';
 import { nreplClient } from './nreplClient';
 import { TestListener } from './testRunner';
@@ -8,6 +9,17 @@ import { TestListener } from './testRunner';
 const HIGHLIGHTING_TIMEOUT = 350;
 const BLOCK_DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
     backgroundColor: { id: 'editor.findMatchHighlightBackground' }
+});
+
+const INLINE_RESULT_LENGTH = 150;
+const INLINE_RESULT_DECORATION_TYPE = vscode.window.createTextEditorDecorationType({
+    before: {
+        margin: '0 0 0 2em',
+        textDecoration: 'none',
+        fontWeight: 'normal',
+        fontStyle: 'normal',
+    },
+    rangeBehavior: vscode.DecorationRangeBehavior.ClosedOpen
 });
 
 export function clojureEval(outputChannel: vscode.OutputChannel): void {
@@ -174,10 +186,15 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
     }
 
     const selection = blockSelection || editor.selection;
-    let text = editor.document.getText();
+    let text = editor.document.getText(),
+        selectionEndLine: number;
+
     if (!selection.isEmpty) {
+        selectionEndLine = selection.end.line;
         const ns: string = cljParser.getNamespace(text);
         text = `(ns ${ns})\n${editor.document.getText(selection)}`;
+    } else {
+        selectionEndLine = editor.document.lineCount - 1;
     }
 
     cljConnection.sessionForFilename(editor.document.fileName).then(session => {
@@ -195,7 +212,7 @@ function evaluate(outputChannel: vscode.OutputChannel, showResults: boolean): vo
             if (!!respObjs[0].ex)
                 return handleError(outputChannel, selection, showResults, respObjs[0].session);
 
-            return handleSuccess(outputChannel, showResults, respObjs);
+            return handleSuccess(outputChannel, showResults, respObjs, selectionEndLine);
         })
     });
 }
@@ -235,10 +252,51 @@ function handleError(outputChannel: vscode.OutputChannel, selection: vscode.Sele
         });
 }
 
-function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[]): void {
+function truncateLine(value: string): string {
+    if (value.length > INLINE_RESULT_LENGTH) {
+        return value.substring(0, INLINE_RESULT_LENGTH) + '...'
+    }
+    return value;
+}
+
+function showInlineResult(respObj: any, line: number): void {
+    const isError = Boolean(respObj.err),
+        editor = vscode.window.activeTextEditor;
+    let result: string,
+        foregroundColor: vscode.ThemeColor;
+
+    if (isError) {
+        // show more error description at once
+        result = respObj.err.replace(/\n/g, ' ');
+        foregroundColor = new vscode.ThemeColor('editorError.foreground');
+    } else {
+        result = respObj.value;
+        foregroundColor = new vscode.ThemeColor('clojureVSCode.inlineResultForeground');
+    }
+
+    if (result && editor) {
+        const decoration: vscode.DecorationOptions = {
+            renderOptions: {
+                before: {
+                    backgroundColor: new vscode.ThemeColor('clojureVSCode.inlineResultBackground'),
+                    color: foregroundColor,
+                    contentText: truncateLine(result),
+                },
+            },
+            range: editor.document.validateRange(
+                new vscode.Range(line, Number.MAX_SAFE_INTEGER, line, Number.MAX_SAFE_INTEGER)
+            )
+        };
+        editor.setDecorations(INLINE_RESULT_DECORATION_TYPE, [decoration]);
+    }
+}
+
+function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean, respObjs: any[], selectionEndLine: number): void {
     if (!showResults) {
         vscode.window.showInformationMessage('Successfully compiled');
     } else {
+        const config = vscode.workspace.getConfiguration('clojureVSCode');
+
         respObjs.forEach(respObj => {
             if (respObj.out)
                 outputChannel.append(respObj.out);
@@ -246,8 +304,23 @@ function handleSuccess(outputChannel: vscode.OutputChannel, showResults: boolean
                 outputChannel.append(respObj.err);
             if (respObj.value)
                 outputChannel.appendLine(`=> ${respObj.value}`);
-            outputChannel.show(true);
+
+            if (config.showResultInline) {
+                showInlineResult(respObj, selectionEndLine);
+            } else {
+                outputChannel.show(true);
+            };
         });
     }
     nreplClient.close(respObjs[0].session);
+};
+
+export function clearInlineResultDecorationOnMove(event: vscode.TextEditorSelectionChangeEvent) {
+    const config = vscode.workspace.getConfiguration('clojureVSCode');
+    if (config.showResultInline
+        && event.textEditor.document.languageId === LANGUAGE
+        && event.textEditor === vscode.window.activeTextEditor) {
+
+        event.textEditor.setDecorations(INLINE_RESULT_DECORATION_TYPE, []);
+    }
 }

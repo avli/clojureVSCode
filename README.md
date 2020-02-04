@@ -61,7 +61,7 @@ option in your VSCode settings globally or per-project and connect manually to w
 
 ```clojure
 {:user {:plugins  [[cider/cider-nrepl "0.22.1"]]
-       :dependencies [[cljfmt "0.5.7"]]}}
+        :dependencies [[cljfmt "0.5.7"]]}}
 ```
 
 Alternatively, you can put the code above to your project `project.clj` file.
@@ -75,6 +75,7 @@ The extension contributes the configuration parameters listed in the table below
 |`clojureVSCode.autoStartNRepl`  | Whether to start an nREPL when opening a file or project. |
 |`clojureVSCode.formatOnSave`    | Format files with [cljfmt](https://github.com/weavejester/cljfmt) on save. |
 |`clojureVSCode.cljfmtParameters`| Formatting parameters passed to `cljfmt` each time it runs, e.g. `:indentation? true :remove-surrounding-whitespace? false` |
+|`clojureVSCode.showResultInline`    | Show evaluation result inline. |
 
 ## ClojureScript Project Setup
 

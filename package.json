@@ -121,11 +121,36 @@
                 },
                 "clojureVSCode.cljfmtParameters": {
                     "type": "string",
-                    "description": "Parameters which will be passed to cljfmt",
+                    "description": "Parameters which will be passed to cljfmt.",
                     "default": ""
+                },
+                "clojureVSCode.showResultInline": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show evaluation result inline."
                 }
             }
-        }
+        },
+        "colors": [
+			{
+				"id": "clojureVSCode.inlineResultBackground",
+				"description": "Background color of the inline result.",
+				"defaults": {
+					"dark": "#00000000",
+					"light": "#00000000",
+					"highContrast": "#00000000"
+				}
+			},
+			{
+				"id": "clojureVSCode.inlineResultForeground",
+				"description": "Foreground color of the inline result.",
+				"defaults": {
+					"dark": "#99999999",
+					"light": "#99999999",
+					"highContrast": "#99999999"
+				}
+			}
+        ]
     },
     "scripts": {
         "vscode:prepublish": "webpack --mode production",

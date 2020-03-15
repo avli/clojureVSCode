@@ -14,7 +14,7 @@ script:
   - |
     echo ">>> Compile clojureVSCode"
     npm install
-    npm run vscode:prepublish
+    npm run test-compile
     echo ">>> Run clojureVSCode unit tests"
     npm run test --silent
 cache: npm

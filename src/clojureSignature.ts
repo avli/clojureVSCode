@@ -70,10 +70,14 @@ function getSignatureHelp(signatureLabel: string, signatureDoc: string, arglists
 
     let activeSignature = signatures.findIndex(signature => signature.parameters.length >= parameterPosition + 1);
     if (activeSignature === -1) {
-        activeSignature = signatures.findIndex(signature => signature.parameters.some(param => param.label.startsWith(PARAMETER_REST)));
+        activeSignature = signatures.findIndex(signature => signature.parameters.some(param => {
+            if (param.label instanceof String) param.label.startsWith(PARAMETER_REST)}));
 
         if (activeSignature === -1)
-            activeSignature = signatures.findIndex(signature => signature.parameters.slice(-1)[0].label.endsWith(SPECIAL_FORM_PARAMETER_REST));
+            activeSignature = signatures.findIndex(signature => {
+                const label = signature.parameters.slice(-1)[0].label;
+                if (label instanceof String) label.endsWith(SPECIAL_FORM_PARAMETER_REST);
+            });
 
         if (activeSignature !== -1)
             parameterPosition = signatures[activeSignature].parameters.length - 1;

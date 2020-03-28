@@ -52,27 +52,40 @@ interface nREPLCloseMessage {
     session?: string;
 }
 
-const complete = (symbol: string, ns: string): Promise<any> => {
+const complete = async (symbol: string, ns: string): Promise<any> => {
     const msg: nREPLCompleteMessage = { op: 'complete', symbol, ns };
-    return send(msg).then(respObjs => respObjs[0]);
+    const respObjs = await send(msg);
+    return respObjs[0];
 };
 
-const info = (symbol: string, ns: string, session?: string): Promise<any> => {
+const info = async (symbol: string, ns: string, session?: string): Promise<any> => {
     const msg: nREPLInfoMessage = { op: 'info', symbol, ns, session };
-    return send(msg).then(respObjs => respObjs[0]);
+    const respObjs = await send(msg);
+    return respObjs[0];
 };
 
-const evaluate = (code: string, session?: string): Promise<any[]> => clone(session).then((session_id) => {
-    const msg: nREPLSingleEvalMessage = { op: 'eval', code: code, session: session_id };
-    return send(msg);
-});
+const evaluate = async (code: string, session?: string): Promise<any[]> => {
+    const sessionId = await clone(session);
+    const msg: nREPLSingleEvalMessage = {
+        op: 'eval',
+        code: code, session: sessionId
+    };
+    return await send(msg);
+};
 
-const evaluateFile = (code: string, filepath: string, session?: string): Promise<any[]> => clone(session).then((session_id) => {
-    const msg: nREPLEvalMessage = { op: 'load-file', file: code, 'file-path': filepath, session: session_id };
-    return send(msg);
-});
+const evaluateFile = async (code: string, filepath: string, session?: string): Promise<any[]> => {
+    const sessionId = await clone(session);
+    const msg: nREPLEvalMessage = {
+        op: 'load-file',
+        file: code,
+        'file-path': filepath,
+        session: sessionId
+    };
+    return await send(msg);
+};
 
-const stacktrace = (session: string): Promise<any> => send({ op: 'stacktrace', session: session });
+const stacktrace = (session: string): Promise<any> =>
+    send({ op: 'stacktrace', session: session });
 
 const runTests = function (namespace: string | undefined): Promise<any[]> {
     const message: TestMessage = {
@@ -81,24 +94,21 @@ const runTests = function (namespace: string | undefined): Promise<any[]> {
         'load?': 1
     }
     return send(message);
-}
-
-
-const clone = (session?: string): Promise<string> => send({ op: 'clone', session: session }).then(respObjs => respObjs[0]['new-session']);
-
-const test = (connectionInfo: CljConnectionInformation): Promise<any[]> => {
-    return send({ op: 'clone' }, connectionInfo)
-        .then(respObjs => respObjs[0])
-        .then(response => {
-            if (!('new-session' in response))
-                return Promise.reject(false);
-            else {
-                return Promise.resolve([]);
-            }
-        });
 };
 
-const close = (session?: string): Promise<any[]> => send({ op: 'close', session: session });
+const clone = async (session?: string): Promise<string> => {
+    const respObjs = await send({ op: 'clone', session: session });
+    return respObjs[0]['new-session'];
+};
+
+const test = async (connectionInfo: CljConnectionInformation): Promise<boolean> => {
+    const respObjs = await send({ op: 'clone' }, connectionInfo);
+    const response = respObjs[0];
+    return 'new-session' in response;
+};
+
+const close = (session?: string): Promise<any[]> =>
+    send({ op: 'close', session: session });
 
 const listSessions = (): Promise<[string]> => {
     return send({ op: 'ls-sessions' }).then(respObjs => {

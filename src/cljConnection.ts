@@ -72,7 +72,7 @@ const stopLoadingAnimation = () => {
     }
 };
 
-const manuallyConnect = (): void => {
+const manuallyConnect = async (): Promise<any> => {
     if (loadingHandler) {
         vscode.window.showWarningMessage('Already starting a nREPL. Disconnect first.');
         return;
@@ -84,46 +84,47 @@ const manuallyConnect = (): void => {
 
     let host: string;
     let port: number;
-    vscode.window.showInputBox({ prompt: 'nREPL host', value: DEFAULT_LOCAL_IP })
-        .then(hostFromUser => {
-            if (!hostFromUser)
-                return Promise.reject({ connectionError: 'Host must be informed.' });
 
-            host = hostFromUser;
+    // Getting host.
+    const hostFromUser = await vscode.window.showInputBox(
+        { prompt: 'nREPL host', value: DEFAULT_LOCAL_IP });
 
-            const portNumberPromptOptions: vscode.InputBoxOptions = { prompt: 'nREPL port number' };
+    if (!hostFromUser)
+        throw { connectionError: 'Host must be informed.' };
 
-            if (hostFromUser === DEFAULT_LOCAL_IP || hostFromUser.toLowerCase() === 'localhost') {
-                const localPort = getLocalNReplPort();
-                if (localPort)
-                    portNumberPromptOptions.value = String(localPort);
-            }
+    host = hostFromUser;
 
-            return <PromiseLike<string>>vscode.window.showInputBox(portNumberPromptOptions); // cast needed to chain promises
-        })
-        .then(portFromUser => {
-            if (!portFromUser)
-                return Promise.reject({ connectionError: 'Port number must be informed.' });
+    const portNumberPromptOptions: vscode.InputBoxOptions = { prompt: 'nREPL port number' };
 
-            const intPort = Number.parseInt(portFromUser);
-            if (!intPort)
-                return Promise.reject({ connectionError: 'Port number must be an integer.' });
+    if (hostFromUser === DEFAULT_LOCAL_IP || hostFromUser.toLowerCase() === 'localhost') {
+        const localPort = getLocalNReplPort();
+        if (localPort)
+            portNumberPromptOptions.value = String(localPort);
+    }
 
-            port = intPort;
-        })
-        .then(() => nreplClient.test({ host, port }))
-        .then(() => {
-            saveConnection({ host, port });
-        }
-        , ({ connectionError }) => {
-            if (!connectionError)
-                connectionError = "Can't connect to the nREPL.";
+    // Getting port.
+    const portFromUser = await vscode.window.showInputBox(portNumberPromptOptions);
 
-            vscode.window.showErrorMessage(connectionError);
-        });
+    if (!portFromUser)
+        throw { connectionError: 'Port number must be informed.' };
+
+    const intPort = Number.parseInt(portFromUser);
+    if (!intPort)
+        throw { connectionError: 'Port number must be an integer.' };
+
+    port = intPort;
+
+    // Check if we are able to connect with the given host and port.
+    const succesfullyConnected = await nreplClient.test({ host, port });
+    if (succesfullyConnected) {
+        saveConnection({ host, port});
+    }
+    else {
+        vscode.window.showErrorMessage("Can't connect to the nREPL.");
+    }
 };
 
-const startNRepl = (): void => {
+const startNRepl = async (): Promise<any> => {
     if (isConnected()) {
         vscode.window.showWarningMessage('Already connected to nREPL. Disconnect first.');
         return;
@@ -131,18 +132,18 @@ const startNRepl = (): void => {
 
     startLoadingAnimation();
 
-    let nreplConnection: CljConnectionInformation;
-    nreplController.start()
-        .then(connectionInfo => nreplConnection = connectionInfo)
-        .then(() => nreplClient.test(nreplConnection))
-        .then(stopLoadingAnimation)
-        .then(() => saveConnection(nreplConnection), ({ nreplError }) => {
-            stopLoadingAnimation();
-            if (!nreplError)
-                nreplError = "Can't start nREPL.";
-            disconnect(false);
-            vscode.window.showErrorMessage(nreplError);
-        });
+    let nreplConnection: CljConnectionInformation = await nreplController.start();
+    const succesfullyConnected = nreplClient.test(nreplConnection);
+
+    stopLoadingAnimation();
+
+    if (succesfullyConnected) {
+        saveConnection(nreplConnection);
+    }
+    else {
+        disconnect(false);
+        vscode.window.showErrorMessage("Can't start nREPL.");
+    }
 };
 
 const disconnect = (showMessage: boolean = true): void => {

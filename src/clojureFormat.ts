@@ -18,10 +18,9 @@ function slashUnescape(contents: string) {
 }
 
 
-export const formatFile = (document: vscode.TextDocument, range: vscode.Range): Promise<vscode.TextEdit[] | undefined> => {
-
+export const formatFile = async (document: vscode.TextDocument, range: vscode.Range): Promise<vscode.TextEdit[] | undefined> => {
     if (!cljConnection.isConnected()) {
-        return Promise.reject("Formatting functions don't work, connect to nREPL first.");
+        throw "Formatting functions don't work, connect to nREPL first.";
     }
 
     let contents: string = document.getText(range);
@@ -29,31 +28,26 @@ export const formatFile = (document: vscode.TextDocument, range: vscode.Range): 
     // Escaping the string before sending it to nREPL
     contents = slashEscape(contents)
 
-
     let cljfmtParams = vscode.workspace.getConfiguration('clojureVSCode').cljfmtParameters;
     cljfmtParams = cljfmtParams.isEmpty ? "nil" : "{"+cljfmtParams+"}";
-
 
     // Running "(require 'cljfmt.core)" in right after we have checked we are connected to nREPL
     // would be a better option but in this case "cljfmt.core/reformat-string" fails the first
     // time it is called. I have no idea what causes this behavior so I decided to put the require
     // statement right here - don't think it does any harm. If someone knows how to fix it
     // please send a pull request with a fix.
-    return nreplClient.evaluate(`(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`)
-        .then(value => {
-            if ('ex' in value[0]) {
-                return Promise.reject(value[1].err);
-            };
-            if (('value' in value[1]) && (value[1].value != 'nil')) {
-                let new_content: string = value[1].value.slice(1, -1);
-                new_content = slashUnescape(new_content);
-                return Promise.resolve([vscode.TextEdit.replace(range, new_content)]);
-            };
-        });
+    const value = await nreplClient.evaluate(
+        `(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`);
+    if ('ex' in value[0]) throw value[1].err;
+    if (('value' in value[1]) && (value[1].value != 'nil')) {
+        let newContent: string = value[1].value.slice(1, -1);
+        newContent = slashUnescape(newContent);
+        return [vscode.TextEdit.replace(range, newContent)]
+    }
 }
 
 
-export const maybeActivateFormatOnSave = () => {
+export const maybeActivateFormatOnSave = (): void => {
     vscode.workspace.onWillSaveTextDocument(e => {
         const document = e.document;
         if (document.languageId !== "clojure") {

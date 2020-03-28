@@ -1,3 +1,11 @@
+# Version 0.13.0
+
+Adds the ability to show evaluation results inline:
+
+![inline-results](https://user-images.githubusercontent.com/1375411/74069697-13c79300-4a10-11ea-9faf-3c2e09c55675.gif)
+
+Adds the ability to show a large evaluation result [#134](https://github.com/avli/clojureVSCode/issues/134).
+
 # Version 0.12.0
 
 Uses VSCode built-in formatting provider to format code [#90](https://github.com/avli/clojureVSCode/issues/90).
@@ -16,7 +24,7 @@ Fix-up release. Reenable automatic nREPL starting.
 
 # Version 0.11.0
 
-Adds ability to evaluate blocks of code without selection [#61](https://github.com/avli/clojureVSCode/issues/61):
+Adds the ability to evaluate blocks of code without selection [#61](https://github.com/avli/clojureVSCode/issues/61):
 
 ![eval-block](https://user-images.githubusercontent.com/1375411/68340984-874bc280-00f8-11ea-9eea-34c7160b8c05.gif)
 
@@ -142,7 +150,7 @@ Fixes the links to the images in README.md.
 # Version 0.7.0
 
 Adds embedded nREPL functionality – no need to connect manually anymore.
-[21](https://github.com/avli/clojureVSCode/issues/21).
+[#21](https://github.com/avli/clojureVSCode/issues/21).
 
 # Version 0.6.1
 

@@ -74,11 +74,13 @@ const stopLoadingAnimation = () => {
 
 const manuallyConnect = async (): Promise<any> => {
     if (loadingHandler) {
-        vscode.window.showWarningMessage('Already starting a nREPL. Disconnect first.');
+        vscode.window.showWarningMessage(
+            'Already starting a nREPL. Disconnect first.');
         return;
     }
     if (isConnected()) {
-        vscode.window.showWarningMessage('Already connected to nREPL. Disconnect first.');
+        vscode.window.showWarningMessage(
+            'Already connected to nREPL. Disconnect first.');
         return;
     }
 
@@ -90,7 +92,7 @@ const manuallyConnect = async (): Promise<any> => {
         { prompt: 'nREPL host', value: DEFAULT_LOCAL_IP });
 
     if (!hostFromUser)
-        throw { connectionError: 'Host must be informed.' };
+        throw new Error('Host must be informed.');
 
     host = hostFromUser;
 
@@ -106,11 +108,11 @@ const manuallyConnect = async (): Promise<any> => {
     const portFromUser = await vscode.window.showInputBox(portNumberPromptOptions);
 
     if (!portFromUser)
-        throw { connectionError: 'Port number must be informed.' };
+        throw new Error("Port number must be informed.");
 
     const intPort = Number.parseInt(portFromUser);
     if (!intPort)
-        throw { connectionError: 'Port number must be an integer.' };
+        throw new Error("Port number must be an integer.");
 
     port = intPort;
 
@@ -126,7 +128,8 @@ const manuallyConnect = async (): Promise<any> => {
 
 const startNRepl = async (): Promise<any> => {
     if (isConnected()) {
-        vscode.window.showWarningMessage('Already connected to nREPL. Disconnect first.');
+        vscode.window.showWarningMessage(
+            "Already connected to nREPL. Disconnect first.");
         return;
     }
 

@@ -20,7 +20,8 @@ function slashUnescape(contents: string) {
 
 export const formatFile = async (document: vscode.TextDocument, range: vscode.Range): Promise<vscode.TextEdit[] | undefined> => {
     if (!cljConnection.isConnected()) {
-        throw "Formatting functions don't work, connect to nREPL first.";
+        throw new Error(
+            "Formatting functions don't work, connect to nREPL first.");
     }
 
     let contents: string = document.getText(range);
@@ -38,7 +39,7 @@ export const formatFile = async (document: vscode.TextDocument, range: vscode.Ra
     // please send a pull request with a fix.
     const value = await nreplClient.evaluate(
         `(require 'cljfmt.core) (cljfmt.core/reformat-string "${contents}" ${cljfmtParams})`);
-    if ('ex' in value[0]) throw value[1].err;
+    if ('ex' in value[0]) throw new Error(value[1].err);
     if (('value' in value[1]) && (value[1].value != 'nil')) {
         let newContent: string = value[1].value.slice(1, -1);
         newContent = slashUnescape(newContent);

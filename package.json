@@ -126,7 +126,7 @@
                 },
                 "clojureVSCode.showResultInline": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "Show evaluation result inline."
                 }
             }

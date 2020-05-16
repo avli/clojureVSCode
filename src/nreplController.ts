@@ -1,5 +1,6 @@
 import 'process';
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import * as spawn from 'cross-spawn';
 import { ChildProcess, exec } from 'child_process';
@@ -44,7 +45,7 @@ const start = (): Promise<CljConnectionInformation> => {
     return new Promise((resolve, reject) => {
 
         nreplProcess = spawn('lein', LEIN_ARGS, {
-            cwd: vscode.workspace.rootPath,
+            cwd: getCwd(), // see the `getCwd` function documentation!
             detached: !(os.platform() === 'win32')
         });
 
@@ -101,6 +102,27 @@ const stop = () => {
 };
 
 const dispose = stop;
+
+/**
+ * It's important to set the current working directory parameter when spawning
+ * the nREPL process. Without the parameter been set, it can take quite a long
+ * period of time for the nREPL to start accepting commands. This most likely
+ * the result of one of the plugins we use doing something with the file
+ * system (first time I've seen it, I was surprised why VSCode and Java
+ * constantly asking for the permissions to access folders in my home directory).
+ */
+const getCwd = () => {
+    let cwd = vscode.workspace.rootPath;
+
+    if (cwd) return cwd;
+
+    // Try to get folder name from the active editor.
+    const document = vscode.window.activeTextEditor?.document;
+
+    if (!document) return;
+
+    return path.dirname(document.fileName);
+}
 
 export const nreplController = {
     start,

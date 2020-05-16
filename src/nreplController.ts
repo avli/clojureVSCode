@@ -6,21 +6,18 @@ import { ChildProcess, exec } from 'child_process';
 
 import { CljConnectionInformation } from './cljConnection';
 
+const config = vscode.workspace.getConfiguration('clojureVSCode');
+
 const LEIN_ARGS: string[] = [
     'update-in',
     ':dependencies',
     'conj',
-    '[org.clojure/tools.nrepl "0.2.13" :exclusions [org.clojure/clojure]]',
-    '--',
-    'update-in',
-    ':dependencies',
-    'conj',
-    '[cljfmt "0.5.7"]',
+    `[cljfmt "${config.cljfmtVersion}"]`,
     '--',
     'update-in',
     ':plugins',
     'conj',
-    '[cider/cider-nrepl "0.20.0"]',
+    `[cider/cider-nrepl "${config.ciderNReplVersion}"]`,
     '--',
     'repl',
     ':headless'

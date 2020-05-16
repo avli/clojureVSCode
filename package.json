@@ -128,6 +128,16 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Show evaluation result inline."
+                },
+                "clojureVSCode.ciderNReplVersion": {
+                    "type": "string",
+                    "default": "0.24.0",
+                    "description": "Version of CIDER to use for the embedded nREPL."
+                },
+                "clojureVSCode.cljfmtVersion": {
+                    "type": "string",
+                    "default": "0.6.7",
+                    "description": "Version of cljfmt to use for formatting Clojure files."
                 }
             }
         },

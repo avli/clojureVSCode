@@ -1,3 +1,7 @@
+# Version 0.13.1
+
+Updates the embedded nREPL dependencies. Add settings for explicitly setting these dependencies versions.
+
 # Version 0.13.0
 
 Adds the ability to show evaluation results inline:

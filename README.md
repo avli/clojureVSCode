@@ -60,8 +60,8 @@ The method from the [Quickstart section](#Quickstart) utilizes the so-called emb
 option in your VSCode settings globally or per-project and connect manually to whichever REPL instance you want by "Clojure: Connect to a running nREPL" command. Note, that in order to make the autocompletion, go to definition, and formatting functionality work you have to write necessary dependencies in your `profiles.clj`. Put the following content to your `~/.lein/profiles.clj` for macOS and Linux:
 
 ```clojure
-{:user {:plugins  [[cider/cider-nrepl "0.22.1"]]
-        :dependencies [[cljfmt "0.5.7"]]}}
+{:user {:plugins  [[cider/cider-nrepl "0.24.0"]]
+        :dependencies [[cljfmt "0.6.7"]]}}
 ```
 
 Alternatively, you can put the code above to your project `project.clj` file.
@@ -70,12 +70,14 @@ Alternatively, you can put the code above to your project `project.clj` file.
 
 The extension contributes the configuration parameters listed in the table below.
 
-| Parameter                      | Description |
-|--------------------------------|-------------|
-|`clojureVSCode.autoStartNRepl`  | Whether to start an nREPL when opening a file or project. |
-|`clojureVSCode.formatOnSave`    | Format files with [cljfmt](https://github.com/weavejester/cljfmt) on save. |
-|`clojureVSCode.cljfmtParameters`| Formatting parameters passed to `cljfmt` each time it runs, e.g. `:indentation? true :remove-surrounding-whitespace? false` |
-|`clojureVSCode.showResultInline`    | Show evaluation result inline. |
+| Parameter                       | Description |
+|---------------------------------|-------------|
+|`clojureVSCode.autoStartNRepl`   | Whether to start an nREPL when opening a file or project. |
+|`clojureVSCode.formatOnSave`     | Format files with [cljfmt](https://github.com/weavejester/cljfmt) on save. |
+|`clojureVSCode.cljfmtParameters` | Formatting parameters passed to `cljfmt` each time it runs, e.g. `:indentation? true :remove-surrounding-whitespace? false` |
+|`clojureVSCode.showResultInline` | Show evaluation result inline. |
+|`clojureVSCode.ciderNReplVersion`| Version of [CIDER nREPL](https://github.com/clojure-emacs/cider-nrepl) to use for the embedded nREPL. |
+|`clojureVSCode.cljfmtVersion`    | Version of `cljfmt` to use for formatting Clojure files. |
 
 ## ClojureScript Project Setup
 
@@ -90,6 +92,14 @@ The embedded nREPL **does not** support ClojureScript, consider to use the "cloj
 
 After that you can connect to the nREPL using the "Clojure: Connect to a running nREPL" command. Now you can evaluate you ClojureScript code and use the other extension facilities.
 
+## Troubleshooting
+
+### All kinds of errors on nREPL start
+
+Please check that you're using the latest version of [CIDER nREPL](https://github.com/clojure-emacs/cider-nrepl). The version the extension uses by default updates periodically, but there still can be a mismatch. In order to redefined the `CIDER nREPL` version you can either:
+
+1. Define it in the `~/.lein/profiles.clj` (see the "Manual Configuration" section above).
+2. Redefine it with the `clojureVSCode.cljfmtVersion` extension setting.
 
 ## How to Contribute
 

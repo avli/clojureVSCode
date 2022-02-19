@@ -185,7 +185,7 @@
     "dependencies": {
         "bencoder": "^0.0.5",
         "cross-spawn": "^6.0.1",
-        "jszip": "^3.4.0"
+        "jszip": "^3.7.0"
     },
     "repository": {
         "type": "git",

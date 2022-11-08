@@ -1,3 +1,7 @@
+# Version 0.13.2
+
+Update the dependencies. Remove the logo (see [168](https://github.com/avli/clojureVSCode/issues/168)).
+
 # Version 0.13.1
 
 Updates the embedded nREPL dependencies. Add settings for explicitly setting these dependencies versions.

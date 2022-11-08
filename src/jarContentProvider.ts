@@ -19,7 +19,7 @@ export class JarContentProvider implements vscode.TextDocumentContentProvider {
             fs.readFile(pathToJar, (err, data) => {
                 let zip = new JSZip();
                 zip.loadAsync(data).then((new_zip) => {
-                    new_zip.file(pathToFileInJar).async("text").then((value) => {
+                    new_zip.file(pathToFileInJar)?.async("text").then((value) => {
                         resolve(value);
                     })
                 })
